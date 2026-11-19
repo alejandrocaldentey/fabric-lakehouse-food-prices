@@ -1,0 +1,57 @@
+# Cost model — rendered into docs/cost.md by `python -m cost.render`.
+#
+# Rules:
+# - Every unit price carries its source URL, region and the date it was checked.
+# - A price that has not been verified stays null and is reported as "pending";
+#   it is never guessed.
+# - Monthly cost = usage per month x unit price (low/high range).
+
+currency: EUR
+region: West Europe
+
+scenarios:
+  demo:
+    label: Demo / PoC
+    assumptions: Daily run, < 10 GB, 1-5 users, single environment, capacity paused outside runs
+  sme:
+    label: SME
+    assumptions: Hourly run, 100 GB - 1 TB, 20-50 users, dev + prod
+  enterprise:
+    label: Enterprise
+    assumptions: Near real time, 10 TB+, hundreds of users, dev + test + prod
+
+components:
+  - process: Compute (ingestion + transformation + serving)
+    option: Microsoft Fabric capacity
+    unit: capacity-hour
+    unit_price: { low: null, high: null }
+    source: https://azure.microsoft.com/pricing/details/microsoft-fabric/
+    verified_on: null
+    usage_per_month: { demo: { sku: F2, hours: 60 }, sme: { sku: F8, hours: 730 }, enterprise: { sku: F64, hours: 730 } }
+
+  - process: Storage
+    option: OneLake storage
+    unit: GB-month
+    unit_price: { low: null, high: null }
+    source: https://azure.microsoft.com/pricing/details/microsoft-fabric/
+    verified_on: null
+    usage_per_month: { demo: { gb: 10 }, sme: { gb: 1000 }, enterprise: { gb: 10000 } }
+
+  - process: BI consumption
+    option: Power BI Pro licences (viewers below F64)
+    unit: user-month
+    unit_price: { low: null, high: null }
+    source: https://www.microsoft.com/power-platform/products/power-bi/pricing
+    verified_on: null
+    usage_per_month: { demo: { users: 0 }, sme: { users: 35 }, enterprise: { users: 0 } }
+
+  - process: CI/CD
+    option: GitHub Actions (public repo)
+    unit: month
+    unit_price: { low: null, high: null }
+    source: https://docs.github.com/billing/managing-billing-for-github-actions/about-billing-for-github-actions
+    verified_on: null
+    usage_per_month: { demo: { units: 1 }, sme: { units: 1 }, enterprise: { units: 1 } }
+
+# Alternatives from ADR 0001 are added here with the same structure
+# (Databricks DBUs, Snowflake credits) once their prices are verified.
