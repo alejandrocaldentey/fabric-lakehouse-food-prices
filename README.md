@@ -72,6 +72,8 @@ python -m ingestion.worldbank FP.CPI.TOTL.ZG --countries "ESP;FRA;DEU" --dates 2
 
 No data is committed to this repo: it is pulled from the APIs on every run.
 
+**Upstream availability.** A weekly CI job calls each API for real. The World Bank check blocks the build; the FAOSTAT check is non-blocking because its servers sometimes reject cloud runners (HTTP 521). In the pipeline, each source keeps its own watermark, so one source being down never blocks the others.
+
 ---
 
 Architecture, decisions and review by [Alejandro Caldentey](https://github.com/alejandrocaldentey). Built with AI assistance.
