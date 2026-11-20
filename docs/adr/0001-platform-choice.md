@@ -1,6 +1,6 @@
 # ADR 0001 — Data platform: Microsoft Fabric
 
-- **Status:** Proposed — awaiting sign-off by Alejandro Caldentey
+- **Status:** Accepted — signed off by Alejandro Caldentey on 2026-11-20
 - **Date:** 2026-11-19
 - **Deciders:** Alejandro Caldentey
 

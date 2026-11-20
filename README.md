@@ -35,7 +35,7 @@ See [docs/architecture.md](docs/architecture.md) for the full data flow.
 
 | ADR | Decision | Status |
 |---|---|---|
-| [0001](docs/adr/0001-platform-choice.md) | Data platform: Microsoft Fabric vs Databricks vs Snowflake | Proposed |
+| [0001](docs/adr/0001-platform-choice.md) | Data platform: Microsoft Fabric vs Databricks vs Snowflake | Accepted |
 | [0002](docs/adr/0002-cicd-github-actions.md) | CI/CD: GitHub Actions + fabric-cicd vs Azure DevOps | Accepted |
 
 ## Cost
