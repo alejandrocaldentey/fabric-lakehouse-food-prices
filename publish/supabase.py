@@ -78,7 +78,27 @@ def upsert(url: str, key: str, table: str, rows: list[dict], session: requests.S
         )
 
 
+def check_write_key(key: str) -> None:
+    """Fail fast, with a clear message, if the key cannot write (a publishable/anon key)."""
+    if key.startswith("sb_publishable_"):
+        raise RuntimeError(
+            "SUPABASE_SERVICE_ROLE_KEY holds the publishable key, which is read-only by design. "
+            "Use the secret key (sb_secret_...) from Supabase > Settings > API keys."
+        )
+    if key.count(".") == 2:  # legacy JWT key: check its role claim without verifying it
+        import base64
+        import json
+
+        body = key.split(".")[1]
+        claims = json.loads(base64.urlsafe_b64decode(body + "=" * (-len(body) % 4)))
+        if claims.get("role") != "service_role":
+            raise RuntimeError(
+                f"The Supabase key has role {claims.get('role')!r}; publishing needs service_role."
+            )
+
+
 def publish(con, url: str, key: str, git_sha: str | None = None, session=None) -> dict[str, int]:
+    check_write_key(key)
     session = session or build_session()
     data = payloads(con)
     for table in TABLES:

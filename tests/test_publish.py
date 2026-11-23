@@ -61,7 +61,7 @@ class FakeSession:
 
 def test_publish_upserts_tables_in_order_then_logs():
     s = FakeSession()
-    counts = supabase.publish(_con(), "https://x.supabase.co", "k", "abc123", session=s)
+    counts = supabase.publish(_con(), "https://x.supabase.co", "sb_secret_k", "abc123", session=s)
     assert [c[0] for c in s.calls] == [*supabase.TABLES, "food_price_publish_log"]
     assert all("merge-duplicates" in c[2] for c in s.calls)
     assert counts["food_price_country"] == 1
@@ -71,3 +71,10 @@ def test_main_without_credentials_is_a_no_op(monkeypatch):
     monkeypatch.delenv("SUPABASE_URL", raising=False)
     monkeypatch.delenv("SUPABASE_SERVICE_ROLE_KEY", raising=False)
     assert supabase.main() == 0
+
+
+def test_read_only_keys_are_rejected_before_any_call():
+    s = FakeSession()
+    with pytest.raises(RuntimeError, match="publishable"):
+        supabase.publish(_con(), "https://x.supabase.co", "sb_publishable_abc", session=s)
+    assert s.calls == []
