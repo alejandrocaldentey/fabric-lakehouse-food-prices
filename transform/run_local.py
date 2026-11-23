@@ -14,6 +14,7 @@ from pathlib import Path
 
 import duckdb
 
+from ml import forecast
 from quality.check import check_contract
 from transform.staging import (
     BRONZE_EUROSTAT_COLUMNS,
@@ -28,6 +29,9 @@ SQL_DIR = ROOT / "sql"
 SEED_DIR = ROOT / "seeds"
 # every table with a contract in quality/contracts/ is checked right after it is built
 CONTRACTS = {p.stem: p for p in (ROOT.parent / "quality" / "contracts").glob("*.yaml")}
+# Python steps that run after a given SQL table is built (their outputs feed later SQL)
+PYTHON_STEPS = {"diamond_country_year": ("ml", forecast.run)}
+PYTHON_OUTPUTS = {"ml": forecast.OUTPUTS}
 
 
 def _create(
@@ -84,6 +88,12 @@ def build(
         con.execute(f"CREATE OR REPLACE TABLE {name} AS {sql_file.read_text()}")
         if name in CONTRACTS:
             check_contract(con, CONTRACTS[name])  # fail before any gold table is built
+        if name in PYTHON_STEPS:
+            step, fn = PYTHON_STEPS[name]
+            fn(con)
+            for table in PYTHON_OUTPUTS[step]:
+                if table in CONTRACTS:
+                    check_contract(con, CONTRACTS[table])
     return con
 
 

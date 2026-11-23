@@ -1,0 +1,57 @@
+# Model catalogue for the predictive layer (ADR 0011). Read by ml/forecast.py and published
+# to the public demo, so the dashboard explains each model from the same definitions.
+#
+# Task: forecast next year's consumer food price change per country (one step ahead),
+# using only what is known at the end of this year. No future information leaks into a
+# backtest: each test year is predicted by a model trained only on earlier years.
+
+target: consumer_food_yoy_pct            # y(t+1), from gold_price_transmission
+features:
+  consumer_food_yoy_pct: consumer food price change this year, c(t)
+  producer_yoy_pct: farm-gate price change this year, p(t)
+  producer_yoy_pct_lag1: farm-gate price change last year, p(t-1)
+
+backtest:
+  first_test_year: 2010                  # rolling origin: train on years < T, predict T
+  shock_threshold_pct: 10                # |p(t)| at or above this marks a shock year
+
+champion:
+  # Complexity has to earn its place, twice:
+  # 1. a model must beat the naive baseline by at least this share of its error;
+  # 2. among the eligible models, the simplest one whose error is within `tolerance` of the
+  #    best wins. Models below are listed from simplest to most complex.
+  metric: mae
+  min_skill_vs_naive: 0.05
+  tolerance: 0.05
+
+interval:
+  lower_quantile: 0.1                    # empirical 80% interval from backtest residuals
+  upper_quantile: 0.9
+
+models:
+  - id: naive
+    label: Naive baseline
+    family: Persistence
+    formula: "c(t+1) = c(t)"
+    how_it_works: Next year's consumer food inflation equals this year's.
+    strengths: No parameters, nothing to overfit, hard to beat in calm years. Every other model must beat it.
+    weaknesses: Blind to farm-gate shocks, so it is always one year late at turning points.
+    when_to_use: As the reference every forecast is measured against, and as the fallback when no model earns its place.
+
+  - id: panel_dl
+    label: Panel distributed-lag regression
+    family: Linear regression with country fixed effects
+    formula: "c(t+1) = a(country) + b1·c(t) + b2·p(t) + b3·p(t-1)"
+    how_it_works: One set of slopes shared by every country, plus a country intercept. b2 and b3 measure how much of a farm-gate change reaches the shelf the following year.
+    strengths: Every coefficient has an economic meaning and can be challenged by the business. Pooling 27 countries gives enough data for stable slopes. Cheap to run and to explain.
+    weaknesses: Assumes the same pass-through in every country and in every regime; misses non-linear effects such as an energy crisis.
+    when_to_use: When the forecast feeds a decision someone must justify (budgets, price negotiations), and data are short annual series.
+
+  - id: gbm
+    label: Gradient boosting
+    family: Machine learning (tree ensemble)
+    formula: "c(t+1) = Σ trees( c(t), p(t), p(t-1) )"
+    how_it_works: Hundreds of shallow decision trees, each correcting the errors of the previous ones.
+    strengths: Captures non-linear effects and thresholds without specifying them.
+    weaknesses: With about 25 years per country it overfits easily, cannot extrapolate beyond shocks it has seen, and its output is hard to explain to a buyer or a regulator.
+    when_to_use: With longer or higher-frequency data (monthly, many products), richer features and a monitoring set-up that catches drift.

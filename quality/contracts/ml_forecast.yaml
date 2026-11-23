@@ -1,0 +1,11 @@
+# Data contract for published forecasts (ADR 0011).
+table: ml_forecast
+owner: Alejandro Caldentey
+primary_key: [model_id, country_iso3, target_year]
+columns:
+  model_id: { required: true, allowed: [naive, panel_dl, gbm] }
+  country_iso3: { required: true }
+  target_year: { required: true, min: 2001, max: 2100 }
+  predicted: { required: true, min: -50, max: 100 }
+  lower_80: { required: true }
+  upper_80: { required: true }

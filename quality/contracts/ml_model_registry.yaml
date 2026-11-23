@@ -1,0 +1,8 @@
+# Data contract for the model registry: exactly the catalogued models, scored on a backtest.
+table: ml_model_registry
+owner: Alejandro Caldentey
+primary_key: [model_id]
+columns:
+  model_id: { required: true, allowed: [naive, panel_dl, gbm] }
+  mae: { required: true, min: 0, max: 100 }
+  n_backtest: { required: true, min: 1 }
