@@ -91,7 +91,7 @@ def fetch_dataset(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Pull a Eurostat dataset as JSON lines.")
-    parser.add_argument("dataset", help="e.g. apri_pi20_outa")
+    parser.add_argument("dataset", help="e.g. apri_pi_outa")
     parser.add_argument("--filter", action="append", default=[], help="dim=code, repeatable")
     parser.add_argument("--since", default=None, help="first period, e.g. 2015")
     args = parser.parse_args(argv)

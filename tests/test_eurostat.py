@@ -59,11 +59,11 @@ class FakeSession:
 def test_fetch_builds_repeated_filters_and_since():
     s = FakeSession(cube({"0": 1.0}))
     recs = eurostat.fetch_dataset(
-        "apri_pi20_outa", {"geo": ["ES", "FR"], "unit": "I20"}, "2021", session=s
+        "apri_pi_outa", {"geo": ["ES", "FR"], "unit": "I20"}, "2021", session=s
     )
     assert ("geo", "ES") in s.params and ("geo", "FR") in s.params
     assert ("sinceTimePeriod", "2021") in s.params
-    assert recs[0]["_dataset"] == "apri_pi20_outa"
+    assert recs[0]["_dataset"] == "apri_pi_outa"
 
 
 @pytest.mark.live

@@ -1,4 +1,4 @@
 series_code,description,unit,source
-PRODUCER_PI,Price index of agricultural products - output (2020 = 100),index,eurostat
+PRODUCER_PI,Price index of agricultural goods incl. fruit and vegetables - output (2020 = 100),index,eurostat
 CONSUMER_FOOD_PI,HICP - food and non-alcoholic beverages (annual average index),index,eurostat
 CPI_INFLATION,Consumer price inflation - all items,annual %,worldbank

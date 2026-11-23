@@ -11,7 +11,7 @@ FAOSTAT was the first choice for global producer and consumer food prices. In pr
 
 | Option | Coverage | Reliability from cloud | Fit with the question |
 |---|---|---|---|
-| **Eurostat Statistics API** (`apri_pi20_outa`, `prc_hicp_aind`) | EU, EFTA, candidates | Good, no key | Producer index and HICP food from one harmonised source |
+| **Eurostat Statistics API** (`apri_pi_outa`, `prc_hicp_aind`) | EU, EFTA, candidates | Good, no key | Producer index and HICP food from one harmonised source |
 | FAOSTAT bulk CSV downloads | Global | Untested; same provider | Same data, heavier files |
 | OECD / IMF SDMX APIs | OECD / global | Good | Consumer prices strong; farm-gate prices weak |
 
