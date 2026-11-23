@@ -1,0 +1,87 @@
+# Alert rules (ADR 0012). `python -m decisions.build` turns them into
+# transform/sql/09_decision_alert.sql and docs/decisions.md.
+#
+# Country rules test `a` = decision_alert_input (one row per country and year).
+# Platform rules test `m` = the champion row of ml_model_registry.
+# `levels` are checked in order; the first that matches sets the severity.
+# Thresholds live here, versioned and reviewed, never inside a dashboard.
+
+rules:
+  - id: farm_gate_shock
+    label: Farm-gate price shock
+    category: market
+    scope: country
+    value: a.producer_price_change_pct
+    unit: "%"
+    levels:
+      - { severity: high, when: "ABS({value}) >= 20" }
+      - { severity: medium, when: "ABS({value}) >= 10" }
+    message: Farm-gate prices moved {value} in {year}. The regression says about a quarter of it reaches shelves the following year.
+
+  - id: margin_squeeze
+    label: Downstream margin squeeze
+    category: market
+    scope: country
+    value: a.food_price_gap_pp
+    unit: pp
+    levels:
+      - { severity: high, when: "{value} <= -10" }
+      - { severity: medium, when: "{value} <= -5" }
+    message: Farm-gate prices rose {abs} faster than shelf prices in {year}. Processors and retailers absorbed the difference.
+
+  - id: margin_expansion
+    label: Shelf prices outrunning farm-gate
+    category: market
+    scope: country
+    value: a.food_price_gap_pp
+    unit: pp
+    levels:
+      - { severity: high, when: "{value} >= 10" }
+      - { severity: medium, when: "{value} >= 5" }
+    message: Shelf prices rose {value} faster than farm-gate prices in {year}. Expect scrutiny of downstream margins.
+
+  - id: food_inflation_premium
+    label: Food outpacing the basket
+    category: market
+    scope: country
+    value: a.food_inflation_premium_pp
+    unit: pp
+    levels:
+      - { severity: high, when: "{value} >= 6" }
+      - { severity: medium, when: "{value} >= 3" }
+    message: Food prices rose {value} faster than overall inflation in {year}.
+
+  - id: forecast_food_inflation
+    label: High food inflation forecast
+    category: forecast
+    scope: country
+    value: a.forecast_next_pct
+    unit: "%"
+    filter: a.is_latest
+    levels:
+      - { severity: high, when: "{value} >= 6" }
+      - { severity: medium, when: "{value} >= 4" }
+    message: The champion model forecasts consumer food inflation of {value} for {next_year}.
+
+  - id: data_stale
+    label: Country data behind the frontier
+    category: data
+    scope: country
+    value: a.years_behind
+    unit: years
+    filter: a.is_latest
+    levels:
+      - { severity: high, when: "{value} >= 2" }
+      - { severity: medium, when: "{value} >= 1" }
+    message: The latest complete year is {year}, {value} behind the other countries. Forecasts for this country rest on older data.
+
+  - id: model_drift
+    label: Forecast model drift
+    category: model
+    scope: platform
+    value: m.mae_recent / NULLIF(m.mae, 0)
+    unit: x
+    levels:
+      - { severity: high, when: "{value} >= 2" }
+      - { severity: medium, when: "{value} >= 1.5" }
+    message: The champion's error over the last three years is {value} its long-run error. Review features or retrain.

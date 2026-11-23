@@ -1,0 +1,10 @@
+# Data contract for fired alerts (ADR 0012).
+table: decision_alert
+owner: Alejandro Caldentey
+primary_key: [alert_id]
+columns:
+  rule_id: { required: true }
+  category: { required: true, allowed: [market, forecast, data, model] }
+  severity: { required: true, allowed: [high, medium] }
+  year: { required: true, min: 2000, max: 2100 }
+  value: { required: true }

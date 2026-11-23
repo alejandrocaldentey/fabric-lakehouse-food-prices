@@ -1,0 +1,147 @@
+# Prescriptive layer (ADR 0012): what each role does when a rule fires.
+# Every play pairs a business decision with the data work that supports it, because an
+# alert nobody can act on is noise. Rendered into docs/decisions.md and published.
+
+roles:
+  - id: hod_manufacturer
+    label: Head of Data · Food manufacturer
+    focus: Protect gross margin when raw-material costs move; give procurement and finance one version of the cost outlook.
+  - id: hod_retail
+    label: Head of Data · Retailer or distributor
+    focus: Keep shelf prices competitive and defensible; give category teams and negotiators the same numbers suppliers will quote.
+  - id: procurement_analytics
+    label: Procurement analytics lead
+    focus: Time contracts, hedges and supplier negotiations with farm-gate price signals.
+  - id: pricing_analytics
+    label: Pricing and revenue analytics lead
+    focus: Decide when and how much to move list prices without losing volume or trust.
+
+plays:
+  farm_gate_shock:
+    hod_manufacturer:
+      business: Re-run the COGS forecast and brief finance on the margin at risk before the next budget cycle.
+      data: Join this index to the bill of materials by commodity; publish cogs_inflation_pct in the semantic layer with the same lag the regression uses.
+      kpi: COGS inflation vs list-price inflation (pp)
+      horizon: 0-3 months
+    hod_retail:
+      business: Expect supplier price-increase requests within two quarters; prepare category baselines now.
+      data: Build a supplier-request tracker that compares each requested increase with the farm-gate index of the product's inputs.
+      kpi: Requested increase minus input-cost increase (pp)
+      horizon: 3-6 months
+    procurement_analytics:
+      business: Decide whether to lock volume or shorten contracts; a shock this size usually partly reverses.
+      data: Add a contract-coverage view (volume locked vs forecast need by month) next to the index and the forecast interval.
+      kpi: Share of next 12 months' volume under fixed price
+      horizon: 0-3 months
+    pricing_analytics:
+      business: Plan staged price moves instead of one jump; consumers react to step changes more than to the total.
+      data: Simulate pass-through scenarios with the published coefficients against your price-elasticity model.
+      kpi: Volume at risk per point of price increase
+      horizon: 3-6 months
+
+  margin_squeeze:
+    hod_manufacturer:
+      business: Prioritise cost-to-serve and mix actions; list prices are lagging input costs.
+      data: Ship a margin bridge (price, volume, mix, input cost) at SKU level, refreshed with every index update.
+      kpi: Gross margin bridge by driver (pp)
+      horizon: 0-3 months
+    hod_retail:
+      business: Suppliers are absorbing costs now and will push them through; anticipate a wave of renegotiations.
+      data: Score suppliers by exposure to the squeezed commodities so negotiators start with the riskiest.
+      kpi: Spend exposed to squeezed categories (%)
+      horizon: 3-6 months
+    procurement_analytics:
+      business: Use the squeeze in negotiations; suppliers' costs rose more than their prices.
+      data: Provide should-cost models per category built on the farm-gate index and the lag structure.
+      kpi: Should-cost vs quoted price (%)
+      horizon: 0-3 months
+    pricing_analytics:
+      business: Identify where a price move is justified by costs and defensible to buyers and consumers.
+      data: Rank SKUs by cost gap and elasticity to target increases where volume risk is lowest.
+      kpi: Margin recovered per point of volume lost
+      horizon: 0-3 months
+
+  margin_expansion:
+    hod_manufacturer:
+      business: Downstream margins are widening; expect retailers to push back on your next increase.
+      data: Evidence pack linking your price changes to input-cost changes, generated from governed metrics, not slides.
+      kpi: Your price change vs input-cost change (pp)
+      horizon: 3-6 months
+    hod_retail:
+      business: Shelf prices are running ahead of costs; reputational and regulatory risk rises.
+      data: Monitor shelf-price vs input-cost gaps by category with alerts, and keep the lineage auditable for regulators.
+      kpi: Shelf vs farm-gate gap by category (pp)
+      horizon: 0-3 months
+    procurement_analytics:
+      business: Farm-gate costs are not the driver; look at energy, labour and logistics in supplier quotes.
+      data: Extend the cost model with energy and labour indices so quotes are decomposed by driver.
+      kpi: Share of quote increase explained by each driver
+      horizon: 3-6 months
+    pricing_analytics:
+      business: Room for promotions or price investment without hurting margin; competitors may move first.
+      data: Track competitor price indices against your own and the farm-gate index.
+      kpi: Price index vs competitors (base 100)
+      horizon: 0-3 months
+
+  food_inflation_premium:
+    hod_manufacturer:
+      business: Food is outpacing household budgets; expect trading down to private label.
+      data: Add channel and brand-tier mix to the sales model to catch trading down early.
+      kpi: Private-label share in your categories (%)
+      horizon: 3-6 months
+    hod_retail:
+      business: Price perception becomes the battleground; protect key-value items.
+      data: Maintain a governed list of key-value items with price-perception tracking.
+      kpi: Basket price index of key-value items
+      horizon: 0-3 months
+    pricing_analytics:
+      business: Elasticities shift when food outpaces income; re-estimate before the next price round.
+      data: Re-train elasticity models with the inflation premium as a feature.
+      kpi: Elasticity change vs last estimate
+      horizon: 0-3 months
+
+  forecast_food_inflation:
+    hod_manufacturer:
+      business: Build next year's budget on the forecast range, not a single number.
+      data: Feed the 80% interval, not only the point, into the planning model and show it in the budget pack.
+      kpi: Budget margin at the low and high end of the interval
+      horizon: next budget cycle
+    hod_retail:
+      business: Agree with category teams which interval bound each plan uses.
+      data: Publish the forecast as a certified metric with its model version, so every plan cites the same run.
+      kpi: Plans using the certified forecast (%)
+      horizon: next budget cycle
+    procurement_analytics:
+      business: Front-load purchases where storage allows and prices are still below the forecast.
+      data: Combine the forecast with storage capacity and shelf life in a buy-timing model.
+      kpi: Cost avoided vs buying at forecast prices
+      horizon: 3-12 months
+    pricing_analytics:
+      business: Prepare the price architecture for the forecast level, with triggers rather than dates.
+      data: Encode price triggers as rules on the published forecast, versioned like these alerts.
+      kpi: Time from trigger to price change (days)
+      horizon: 3-12 months
+
+  data_stale:
+    hod_manufacturer:
+      business: Treat this country's numbers as provisional in any decision.
+      data: Show freshness next to every metric and fall back to the regional aggregate with a visible flag.
+      kpi: Decisions taken on stale data (count)
+      horizon: now
+    hod_retail:
+      business: Do not benchmark this country's suppliers on these numbers until the data catch up.
+      data: Add a freshness SLA per source to the data contract and alert the owner, not the consumer.
+      kpi: Sources within freshness SLA (%)
+      horizon: now
+
+  model_drift:
+    hod_manufacturer:
+      business: Pause decisions that rely on the point forecast; use the interval or the baseline.
+      data: Open a model review - check feature drift, retrain, and re-run the champion selection.
+      kpi: Recent vs long-run forecast error (x)
+      horizon: now
+    hod_retail:
+      business: Tell planners the forecast is under review and which fallback to use.
+      data: Route drift alerts to the model owner with the backtest attached; record the decision in an ADR.
+      kpi: Time to resolve a drift alert (days)
+      horizon: now
