@@ -47,6 +47,16 @@ def test_payloads_follow_fk_order_and_catalogue():
     assert row["headline_inflation_pct"] == pytest.approx(3.1)
 
 
+def test_every_payload_is_strict_json():
+    import json
+
+    con = _con()
+    data = supabase.keyed_payloads(con) | supabase.snapshot_payloads(
+        con, "r1", supabase.run_stats(con)
+    )
+    json.dumps(data, allow_nan=False)  # what requests does before sending
+
+
 class FakeSession:
     def __init__(self):
         self.calls = []

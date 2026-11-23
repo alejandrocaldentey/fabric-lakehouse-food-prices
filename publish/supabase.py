@@ -17,6 +17,7 @@ the same tables with the publishable key, limited by RLS to SELECT.
 
 from __future__ import annotations
 
+import json
 import math
 import os
 import sys
@@ -90,6 +91,11 @@ def keyed_payloads(con) -> dict[str, list[dict]]:
     }
 
 
+def _jsonable(obj):
+    """YAML gives dates and other non-JSON types; the API needs plain JSON."""
+    return json.loads(json.dumps(obj, default=str))
+
+
 def platform_artifacts(con, stats: dict) -> list[dict]:
     """Metadata documents the architecture page renders: generated from the code, never drawn."""
     edges = governance_build.lineage()
@@ -105,7 +111,7 @@ def platform_artifacts(con, stats: dict) -> list[dict]:
     sources = yaml.safe_load((ROOT / "ingestion" / "sources.yaml").read_text())["sources"]
     product = yaml.safe_load((ROOT / "governance" / "product.yaml").read_text())["product"]
     cost = yaml.safe_load((ROOT / "cost" / "model.yaml").read_text())
-    return [
+    docs = [
         {
             "name": "lineage",
             "body": {
@@ -121,6 +127,7 @@ def platform_artifacts(con, stats: dict) -> list[dict]:
         {"name": "cost", "body": cost},
         {"name": "run", "body": stats},
     ]
+    return [{"name": d["name"], "body": _jsonable(d["body"])} for d in docs]
 
 
 def snapshot_payloads(con, run_id: str, stats: dict) -> dict[str, list[dict]]:
