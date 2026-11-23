@@ -1,0 +1,14 @@
+# Data contract for silver_price_observation (subset of the Open Data Contract Standard).
+# Checked by quality/check.py before any gold table is built.
+table: silver_price_observation
+owner: Alejandro Caldentey
+primary_key: [source, country_iso3, year, month, series_code, item_code]
+columns:
+  source: { required: true, allowed: [worldbank, faostat] }
+  country_iso3: { required: true }
+  year: { required: true, min: 1960, max: 2100 }
+  month: { required: false, min: 1, max: 12 }
+  series_code: { required: true, allowed: [PRODUCER_PI, CONSUMER_FOOD_PI, CPI_INFLATION] }
+  item_code: { required: true }
+  value: { required: false }
+  ingested_at: { required: true }

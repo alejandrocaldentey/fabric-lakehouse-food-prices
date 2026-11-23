@@ -1,0 +1,4 @@
+series_code,description,unit,source
+PRODUCER_PI,Agricultural producer price index (unweighted mean across items),index,faostat
+CONSUMER_FOOD_PI,Consumer prices - food indices,index,faostat
+CPI_INFLATION,Consumer price inflation - all items,annual %,worldbank
