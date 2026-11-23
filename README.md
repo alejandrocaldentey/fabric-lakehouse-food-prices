@@ -89,4 +89,4 @@ No data is committed to this repo: it is pulled from the APIs on every run.
 
 ---
 
-Architecture, decisions and review by [Alejandro Caldentey](https://github.com/alejandrocaldentey). Built with AI assistance.
+Designed and built by [Alejandro Caldentey](https://github.com/alejandrocaldentey).
