@@ -1,0 +1,31 @@
+# Source registry: what to pull, how to map it, and how to load it.
+#
+# load.strategy (ADR 0005):
+#   window_merge  re-pull the last `window_years` periods and MERGE on the natural key
+#                 (default: official statistics are revised after first publication)
+#   watermark     pull only periods after the last loaded one (append-only sources)
+#   full          re-pull everything on every run (small or unkeyed sources)
+
+sources:
+  - id: eurostat_producer_prices
+    api: eurostat
+    dataset: apri_pi20_outa
+    description: Price indices of agricultural products, output (2020 = 100), annual
+    filters: { p_adj: NI, unit: I20, product: "140000" }
+    series_code: PRODUCER_PI
+    load: { strategy: window_merge, window_years: 3 }
+
+  - id: eurostat_hicp_food
+    api: eurostat
+    dataset: prc_hicp_aind
+    description: HICP food and non-alcoholic beverages, annual average index
+    filters: { unit: INX_A_AVG, coicop: CP01 }
+    series_code: CONSUMER_FOOD_PI
+    load: { strategy: window_merge, window_years: 3 }
+
+  - id: worldbank_cpi_inflation
+    api: worldbank
+    indicator: FP.CPI.TOTL.ZG
+    description: Consumer price inflation, all items (annual %), global context
+    series_code: CPI_INFLATION
+    load: { strategy: window_merge, window_years: 3 }

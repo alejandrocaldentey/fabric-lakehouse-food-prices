@@ -2,36 +2,21 @@ import pytest
 
 from quality.check import ContractViolation
 from transform import run_local
-from transform.staging import snake, stage_faostat
+from transform.staging import stage_eurostat
 
-PPI = "Producer Price Index (2014-2016 = 100)"
-FOOD = "Consumer Prices, Food Indices (2015 = 100)"
+PRODUCER = "apri_pi20_outa"
+FOOD = "prc_hicp_aind"
 
 
-def fao(
-    domain,
-    m49,
-    item_code,
-    item,
-    element,
-    year,
-    value,
-    months="7021",
-    at="2026-11-20T08:00:00+00:00",
-):
-    """A raw FAOSTAT row, with the labels the API uses."""
+def es(dataset, geo, time, value, at="2026-11-20T08:00:00+00:00"):
+    """A flattened Eurostat record, as ingestion.eurostat returns it."""
     return {
-        "Area Code (M49)": f"'{m49}",
-        "Area": "x",
-        "Item Code": item_code,
-        "Item": item,
-        "Element": element,
-        "Year": str(year),
-        "Months Code": months,
-        "Unit": "",
-        "Value": value,
-        "Flag": "A",
-        "_domain": domain,
+        "unit": "I20",
+        "geo": geo,
+        "time": str(time),
+        "value": value,
+        "_source": "eurostat",
+        "_dataset": dataset,
         "_ingested_at": at,
     }
 
@@ -52,52 +37,43 @@ def wb(country, year, value):
 
 @pytest.fixture
 def bronze():
-    faostat = [
-        # Spain producer prices: two items, three years
-        fao("PP", 724, "15", "Wheat", PPI, 2020, 100.0),
-        fao("PP", 724, "44", "Barley", PPI, 2020, 100.0),
-        fao("PP", 724, "15", "Wheat", PPI, 2021, 110.0),
-        fao("PP", 724, "44", "Barley", PPI, 2021, 130.0),
-        fao("PP", 724, "15", "Wheat", PPI, 2022, 132.0),
-        fao("PP", 724, "44", "Barley", PPI, 2022, 156.0),
-        # a re-ingested correction: the later row must win
-        fao("PP", 724, "44", "Barley", PPI, 2022, 144.0, at="2026-11-21T08:00:00+00:00"),
-        # Spain consumer food prices: monthly, averaged to the year
-        fao("CP", 724, "23013", FOOD, "Value", 2020, 100.0, months="7001"),
-        fao("CP", 724, "23013", FOOD, "Value", 2020, 100.0, months="7002"),
-        fao("CP", 724, "23013", FOOD, "Value", 2021, 104.0, months="7001"),
-        fao("CP", 724, "23013", FOOD, "Value", 2021, 106.0, months="7002"),
-        fao("CP", 724, "23013", FOOD, "Value", 2022, 115.5, months="7001"),
-        fao("CP", 724, "23013", FOOD, "Value", 2022, 115.5, months="7002"),
-        # a regional aggregate (M49 001 = World) has no country and is dropped
-        fao("PP", 1, "15", "Wheat", PPI, 2022, 999.0),
+    eurostat = [
+        es(PRODUCER, "ES", 2020, 100.0),
+        es(PRODUCER, "ES", 2021, 120.0),
+        es(PRODUCER, "ES", 2022, 150.0),
+        # a revision published later: the newer row must win
+        es(PRODUCER, "ES", 2022, 138.0, at="2026-11-21T08:00:00+00:00"),
+        es(FOOD, "ES", 2020, 100.0),
+        es(FOOD, "ES", 2021, 105.0),
+        es(FOOD, "ES", 2022, 115.5),
+        # Greece uses the EU protocol code EL
+        es(PRODUCER, "EL", 2022, 110.0),
+        # EU aggregate has no ISO code and is dropped
+        es(PRODUCER, "EU27_2020", 2022, 125.0),
     ]
     worldbank = [wb("ESP", 2021, 3.1), wb("ESP", 2022, 8.4)]
-    return worldbank, faostat
+    return worldbank, eurostat
 
 
-def test_snake_case_labels():
-    assert snake("Area Code (M49)") == "area_code_m49"
-    assert (
-        stage_faostat({"Area Code (M49)": "'724", "Months Code": "7003"})["area_code_m49"] == "724"
-    )
+def test_staging_maps_eu_protocol_codes_and_series():
+    row = stage_eurostat(es(PRODUCER, "EL", 2022, 1.0))
+    assert row["geo_iso2"] == "GR" and row["series_code"] == "PRODUCER_PI"
 
 
 def test_silver_conforms_dedupes_and_drops_aggregates(bronze):
     con = run_local.build(*bronze)
-    countries = con.execute("SELECT DISTINCT country_iso3 FROM silver_price_observation").fetchall()
-    assert countries == [("ESP",)]
-    barley_2022 = con.execute(
-        "SELECT value FROM silver_price_observation WHERE item_code = '44' AND year = 2022"
+    countries = con.execute(
+        "SELECT DISTINCT country_iso3 FROM silver_price_observation ORDER BY 1"
     ).fetchall()
-    assert barley_2022 == [(144.0,)]
-    months = con.execute(
-        "SELECT DISTINCT month FROM silver_price_observation WHERE series_code = 'CONSUMER_FOOD_PI' ORDER BY month"
+    assert countries == [("ESP",), ("GRC",)]
+    revised = con.execute(
+        "SELECT value FROM silver_price_observation "
+        "WHERE series_code = 'PRODUCER_PI' AND country_iso3 = 'ESP' AND year = 2022"
     ).fetchall()
-    assert months == [(1,), (2,)]
+    assert revised == [(138.0,)]
 
 
-def test_fact_averages_months_then_items(bronze):
+def test_fact_annual_values(bronze):
     con = run_local.build(*bronze)
     rows = dict(
         con.execute(
@@ -105,9 +81,8 @@ def test_fact_averages_months_then_items(bronze):
             "WHERE country_iso3 = 'ESP'"
         ).fetchall()
     )
-    assert rows["PRODUCER_PI-2021"] == pytest.approx(120.0)  # (110 + 130) / 2
-    assert rows["PRODUCER_PI-2022"] == pytest.approx(138.0)  # (132 + 144) / 2, correction applied
-    assert rows["CONSUMER_FOOD_PI-2021"] == pytest.approx(105.0)  # (104 + 106) / 2
+    assert rows["PRODUCER_PI-2022"] == pytest.approx(138.0)
+    assert rows["CONSUMER_FOOD_PI-2021"] == pytest.approx(105.0)
     assert rows["CPI_INFLATION-2022"] == pytest.approx(8.4)
 
 
@@ -129,7 +104,7 @@ def test_price_transmission(bronze):
 
 
 def test_contract_stops_the_run_before_gold(bronze):
-    worldbank, faostat = bronze
+    worldbank, eurostat = bronze
     worldbank.append(wb("ESP", 1800, 1.0))
     with pytest.raises(ContractViolation, match="year"):
-        run_local.build(worldbank, faostat)
+        run_local.build(worldbank, eurostat)

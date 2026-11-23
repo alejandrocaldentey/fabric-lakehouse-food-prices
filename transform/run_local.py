@@ -16,9 +16,10 @@ import duckdb
 
 from quality.check import check_contract
 from transform.staging import (
-    BRONZE_FAOSTAT_COLUMNS,
+    BRONZE_EUROSTAT_COLUMNS,
     BRONZE_WORLDBANK_COLUMNS,
-    stage_faostat,
+    series_by_dataset,
+    stage_eurostat,
     stage_worldbank,
 )
 
@@ -53,7 +54,7 @@ def load_seeds(con: duckdb.DuckDBPyConnection) -> None:
         table = f"seed_{path.stem}" if path.stem != "country_codes" else "seed_country"
         _create(con, table, list(rows[0].keys()), rows)
     con.execute(
-        "CREATE OR REPLACE TABLE seed_country AS SELECT CAST(m49 AS INT) AS m49, iso3, name FROM seed_country"
+        "CREATE OR REPLACE TABLE seed_country AS SELECT CAST(m49 AS INT) AS m49, iso2, iso3, name FROM seed_country"
     )
 
 
@@ -63,7 +64,7 @@ def table_name(sql_file: Path) -> str:
 
 def build(
     worldbank_rows: list[dict],
-    faostat_rows: list[dict],
+    eurostat_rows: list[dict],
     con: duckdb.DuckDBPyConnection | None = None,
 ) -> duckdb.DuckDBPyConnection:
     """Load bronze rows, run every SQL file in order and check contracts. Returns the connection."""
@@ -75,7 +76,13 @@ def build(
         BRONZE_WORLDBANK_COLUMNS,
         [stage_worldbank(r) for r in worldbank_rows],
     )
-    _create(con, "bronze_faostat", BRONZE_FAOSTAT_COLUMNS, [stage_faostat(r) for r in faostat_rows])
+    series = series_by_dataset()
+    _create(
+        con,
+        "bronze_eurostat",
+        BRONZE_EUROSTAT_COLUMNS,
+        [stage_eurostat(r, series) for r in eurostat_rows],
+    )
     for sql_file in sorted(SQL_DIR.glob("[0-9][0-9]_*.sql")):
         name = table_name(sql_file)
         con.execute(f"CREATE OR REPLACE TABLE {name} AS {sql_file.read_text()}")
@@ -98,13 +105,13 @@ def main(argv: list[str] | None = None) -> int:
         "--worldbank", type=Path, help="JSON lines from `python -m ingestion.worldbank`"
     )
     parser.add_argument(
-        "--faostat", type=Path, help="JSON lines from `python -m ingestion.faostat`"
+        "--eurostat", type=Path, help="JSON lines from `python -m ingestion.eurostat`"
     )
     parser.add_argument(
         "--out", type=Path, default=Path("data/gold"), help="folder for Parquet output"
     )
     args = parser.parse_args(argv)
-    con = build(_read_jsonl(args.worldbank), _read_jsonl(args.faostat))
+    con = build(_read_jsonl(args.worldbank), _read_jsonl(args.eurostat))
     args.out.mkdir(parents=True, exist_ok=True)
     for table in ("dim_country", "dim_series", "fact_price_annual", "gold_price_transmission"):
         con.execute(f"COPY {table} TO '{args.out / table}.parquet' (FORMAT PARQUET)")

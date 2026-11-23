@@ -36,6 +36,5 @@ jobs:
       - run: pip install -e ".[dev]"
       - name: Live World Bank API (blocking)
         run: pytest -m live -q tests/test_worldbank.py
-      - name: Live FAOSTAT API (non-blocking, upstream availability varies)
-        continue-on-error: true
-        run: pytest -m live -q tests/test_faostat.py
+      - name: Live Eurostat API (blocking)
+        run: pytest -m live -q tests/test_eurostat.py

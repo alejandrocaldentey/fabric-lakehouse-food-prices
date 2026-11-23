@@ -4,7 +4,7 @@ table: silver_price_observation
 owner: Alejandro Caldentey
 primary_key: [source, country_iso3, year, month, series_code, item_code]
 columns:
-  source: { required: true, allowed: [worldbank, faostat] }
+  source: { required: true, allowed: [worldbank, eurostat] }
   country_iso3: { required: true }
   year: { required: true, min: 1960, max: 2100 }
   month: { required: false, min: 1, max: 12 }
