@@ -22,8 +22,11 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check . && ruff format --check .
       - run: pytest
-      - name: Cost report is up to date
-        run: python -m cost.render && git diff --exit-code docs/cost.md
+      - name: Generated files are up to date (cost, metrics, governance)
+        run: |
+          python -m cost.render && git diff --exit-code docs/cost.md
+          python -m metrics.build --check
+          python -m governance.build --check
 
   live-smoke:
     needs: test
