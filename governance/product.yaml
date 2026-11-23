@@ -5,7 +5,7 @@ product:
   title: Food price transmission in Europe
   domain: Agri-food economics
   owner: Alejandro Caldentey
-  purpose: Show how changes in farm-gate prices reach consumer food prices, by country and year.
+  purpose: Show how changes in farm-gate prices reach consumer food prices, forecast next year and turn signals into role-specific actions.
   consumers:
     - Power BI semantic model (Fabric, Direct Lake)
     - Public dashboard (Vercel, read-only API on Supabase)
@@ -21,6 +21,15 @@ product:
       description: Certified metrics, one row per country and year
       contract: quality/contracts/diamond_country_year.yaml
       metrics: metrics/metrics.yaml
+    - table: ml_forecast
+      description: Next year's consumer food price change per country and model, with an 80% interval
+      contract: quality/contracts/ml_forecast.yaml
+    - table: ml_model_registry
+      description: Catalogued models scored on a rolling-origin backtest, champion flagged
+      contract: quality/contracts/ml_model_registry.yaml
+    - table: decision_alert
+      description: Fired alert rules by country and year, linked to role playbooks
+      contract: quality/contracts/decision_alert.yaml
     - table: gold_price_transmission
       description: Producer vs consumer food price changes, side by side
       contract: quality/contracts/gold_price_transmission.yaml

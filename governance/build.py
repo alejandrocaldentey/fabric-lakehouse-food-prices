@@ -36,10 +36,16 @@ def table_refs(sql: str) -> set[str]:
 
 
 def lineage() -> dict[str, list[str]]:
-    """table -> sorted upstream tables, for every SQL file in build order."""
+    """table -> sorted upstream tables, for every SQL file and Python step in build order."""
+    from ml import forecast  # the predictive step declares its own inputs and outputs
+
     out = {}
     for path in sorted(SQL_DIR.glob("[0-9][0-9]_*.sql")):
-        out[path.stem.split("_", 1)[1]] = sorted(table_refs(path.read_text()))
+        name = path.stem.split("_", 1)[1]
+        out[name] = sorted(table_refs(path.read_text()))
+        if name == "diamond_country_year":
+            for table in forecast.OUTPUTS:
+                out[table] = sorted(forecast.INPUTS)
     return out
 
 
@@ -49,6 +55,8 @@ def _layer(table: str) -> str:
         ("seed_", "Seeds"),
         ("silver_", "Silver"),
         ("diamond_", "Diamond"),
+        ("ml_", "Predictive"),
+        ("decision_", "Decision"),
     ):
         if table.startswith(prefix):
             return layer
@@ -103,7 +111,7 @@ def render(product: dict, sources: list[dict], edges: dict[str, list[str]]) -> s
     by_layer: dict[str, list[str]] = {}
     for n in sorted(nodes):
         by_layer.setdefault(_layer(n), []).append(n)
-    for layer in ("Seeds", "Bronze", "Silver", "Gold", "Diamond"):
+    for layer in ("Seeds", "Bronze", "Silver", "Gold", "Diamond", "Predictive", "Decision"):
         if layer in by_layer:
             lines.append(f"    subgraph {layer}")
             lines += [

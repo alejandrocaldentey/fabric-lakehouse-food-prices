@@ -22,10 +22,11 @@ jobs:
       - run: pip install -e ".[dev]"
       - run: ruff check . && ruff format --check .
       - run: pytest
-      - name: Generated files are up to date (cost, metrics, governance)
+      - name: Generated files are up to date (cost, metrics, decisions, governance)
         run: |
           python -m cost.render && git diff --exit-code docs/cost.md
           python -m metrics.build --check
+          python -m decisions.build --check
           python -m governance.build --check
 
   live-smoke:
@@ -56,5 +57,5 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e .
-      - name: Publish Diamond to Supabase (no-op until the secret is set)
+      - name: Publish Diamond, forecasts, alerts and platform metadata to Supabase
         run: python -m publish.supabase
