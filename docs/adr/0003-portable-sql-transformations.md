@@ -1,6 +1,6 @@
 # ADR 0003 — Transformations as portable SQL, tested locally on DuckDB
 
-- **Status:** Proposed — awaiting sign-off by Alejandro Caldentey
+- **Status:** Accepted — signed off by Alejandro Caldentey on 2026-11-23
 - **Date:** 2026-11-23
 - **Deciders:** Alejandro Caldentey
 
