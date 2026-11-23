@@ -1,0 +1,7 @@
+series_code,unit,priority,description
+PRODUCER_PI,I20,1,Eurostat agricultural output price index 2020 = 100
+PRODUCER_PI,I15,2,Eurostat agricultural output price index 2015 = 100
+PRODUCER_PI,I10,3,Eurostat agricultural output price index 2010 = 100
+PRODUCER_PI,I05,4,Eurostat agricultural output price index 2005 = 100
+PRODUCER_PI,I00,5,Eurostat agricultural output price index 2000 = 100
+CONSUMER_FOOD_PI,INX_A_AVG,1,HICP annual average index (single current base)

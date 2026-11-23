@@ -1,4 +1,5 @@
 -- silver_price_observation: typed, conformed and deduplicated observations from every source.
+-- One row per base (unit) as well: the farm-gate index arrives in several bases.
 -- Portable SQL (Spark SQL and DuckDB). See docs/adr/0003-portable-sql-transformations.md.
 -- In Fabric this result is MERGEd into the Delta table on the natural key (ADR 0005).
 WITH worldbank AS (
@@ -47,7 +48,7 @@ ranked AS (
     SELECT
         *,
         ROW_NUMBER() OVER (
-            PARTITION BY source, country_iso3, year, month, series_code, item_code
+            PARTITION BY source, country_iso3, year, month, series_code, item_code, unit
             ORDER BY ingested_at DESC
         ) AS rn
     FROM unioned

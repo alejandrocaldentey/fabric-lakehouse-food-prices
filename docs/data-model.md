@@ -21,7 +21,9 @@ Four layers: **silver** conforms, **gold** models, **Diamond** defines what the 
 | unit | string | |
 | ingested_at | timestamp | latest wins on duplicates (revisions) |
 
-Natural key: `source, country_iso3, year, month, series_code, item_code`. In Fabric it is MERGEd on this key ([ADR 0005](adr/0005-load-strategy-window-merge.md)).
+Natural key: `source, country_iso3, year, month, series_code, item_code, unit` (the farm-gate index arrives in five bases). In Fabric it is MERGEd on this key ([ADR 0005](adr/0005-load-strategy-window-merge.md)).
+
+`silver_price_index_chained` — one continuous index per country and series, chain-linked across bases and rebased to 2020 = 100 ([ADR 0010](adr/0010-chain-linked-price-indices.md)). Every row keeps `source_unit`, `source_value`, `rebase_factor` and `link_year`, so a value can be traced to the figure Eurostat published.
 
 ## Gold (star schema)
 
@@ -71,3 +73,8 @@ erDiagram
 | `PRODUCER_PI` | Eurostat `apri_pi_outa` (`am_item=AM140000`, nominal, 2020 = 100) | Price index of agricultural goods incl. fruit and vegetables, output |
 | `CONSUMER_FOOD_PI` | Eurostat `prc_hicp_aind` (`coicop=CP01`, annual average index) | HICP — food and non-alcoholic beverages |
 | `CPI_INFLATION` | World Bank `FP.CPI.TOTL.ZG` | Consumer price inflation, all items (annual %) |
+
+## Predictive and decision layers
+
+- `ml_model_registry`, `ml_backtest`, `ml_forecast`, `ml_coefficient` — built by `ml/forecast.py` from `gold_price_transmission` ([ADR 0011](adr/0011-model-selection-champion-challenger.md)).
+- `decision_alert_input` and `decision_alert` — alert rules compiled from `decisions/rules.yaml`; see [decision layer](decisions.md) ([ADR 0012](adr/0012-decision-layer.md)).

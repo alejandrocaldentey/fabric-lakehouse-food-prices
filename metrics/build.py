@@ -15,7 +15,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOGUE = ROOT / "metrics" / "metrics.yaml"
-SQL_OUT = ROOT / "transform" / "sql" / "06_diamond_country_year.sql"
+SQL_OUT = ROOT / "transform" / "sql" / "07_diamond_country_year.sql"
 DOC_OUT = ROOT / "docs" / "metrics.md"
 
 NAME = re.compile(r"^[a-z][a-z0-9_]*$")

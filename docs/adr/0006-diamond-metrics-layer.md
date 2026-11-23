@@ -19,7 +19,7 @@ Gold is a star schema: it says *what happened*, not *what the number means*. Wit
 
 A combination of the first and third options: **[`metrics/metrics.yaml`](../../metrics/metrics.yaml) is the only place a metric is defined** (name, label, unit, formula, owner, status). `python -m metrics.build` generates:
 
-- `transform/sql/06_diamond_country_year.sql` — the **materialised Diamond table**, one column per metric;
+- `transform/sql/07_diamond_country_year.sql` — the **materialised Diamond table**, one column per metric;
 - [`docs/metrics.md`](../metrics.md) — the human-readable catalogue;
 - next: the DAX measures of the Fabric semantic model and the read-only API views of the public demo.
 

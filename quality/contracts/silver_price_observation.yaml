@@ -2,7 +2,7 @@
 # Checked by quality/check.py before any gold table is built.
 table: silver_price_observation
 owner: Alejandro Caldentey
-primary_key: [source, country_iso3, year, month, series_code, item_code]
+primary_key: [source, country_iso3, year, month, series_code, item_code, unit]
 columns:
   source: { required: true, allowed: [worldbank, eurostat] }
   country_iso3: { required: true }

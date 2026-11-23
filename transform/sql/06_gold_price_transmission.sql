@@ -1,4 +1,5 @@
 -- gold_price_transmission: producer vs consumer food price changes, side by side.
+-- Index levels are chain-linked and rebased to 2020 = 100 (ADR 0010), so they compare directly.
 -- Year-on-year changes are only computed between consecutive years (no silent gaps).
 WITH indexed AS (
     SELECT
@@ -20,7 +21,8 @@ yoy AS (
         CASE
             WHEN prev_year = year - 1 AND prev_value <> 0 THEN 100.0 * (value / prev_value - 1)
             ELSE CAST(NULL AS DOUBLE)
-        END AS yoy_pct
+        END AS yoy_pct,
+        value AS index_value
     FROM indexed
 ),
 
@@ -29,7 +31,9 @@ paired AS (
         p.country_iso3,
         p.year,
         p.yoy_pct AS producer_yoy_pct,
-        c.yoy_pct AS consumer_food_yoy_pct
+        c.yoy_pct AS consumer_food_yoy_pct,
+        p.index_value AS producer_index,
+        c.index_value AS consumer_food_index
     FROM yoy AS p
     JOIN yoy AS c
         ON p.country_iso3 = c.country_iso3
@@ -52,5 +56,7 @@ SELECT
     producer_yoy_pct,
     consumer_food_yoy_pct,
     consumer_food_yoy_pct - producer_yoy_pct AS gap_pp,
+    producer_index,
+    consumer_food_index,
     CASE WHEN prev_year = year - 1 THEN prev_producer_yoy END AS producer_yoy_pct_lag1
 FROM lagged

@@ -1,7 +1,7 @@
 # Metric catalogue — the single definition of every number this product publishes (ADR 0006).
 #
 # `python -m metrics.build` generates from this file:
-#   transform/sql/06_diamond_country_year.sql  (the materialised Diamond table)
+#   transform/sql/07_diamond_country_year.sql  (the materialised Diamond table)
 #   docs/metrics.md                             (the human-readable catalogue)
 # Later: DAX measures for the Fabric semantic model and the API views for the public demo.
 #
@@ -43,6 +43,22 @@ metrics:
     unit: ratio
     expression: CASE WHEN ABS(t.producer_yoy_pct_lag1) >= 1 THEN t.consumer_food_yoy_pct / t.producer_yoy_pct_lag1 END
     status: experimental
+    owner: Alejandro Caldentey
+
+  - name: producer_price_index
+    label: Farm-gate price level
+    description: Agricultural output price index, chain-linked across Eurostat bases and rebased to 2020 = 100. Compare levels with the consumer index directly.
+    unit: index (2020 = 100)
+    expression: t.producer_index
+    status: certified
+    owner: Alejandro Caldentey
+
+  - name: consumer_food_price_index
+    label: Consumer food price level
+    description: HICP food and non-alcoholic beverages, rebased to 2020 = 100.
+    unit: index (2020 = 100)
+    expression: t.consumer_food_index
+    status: certified
     owner: Alejandro Caldentey
 
   - name: headline_inflation_pct

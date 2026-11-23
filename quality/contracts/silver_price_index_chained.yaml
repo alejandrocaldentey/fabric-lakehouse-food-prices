@@ -1,0 +1,11 @@
+# Data contract for the chain-linked indices (ADR 0010).
+table: silver_price_index_chained
+owner: Alejandro Caldentey
+primary_key: [country_iso3, series_code, year]
+columns:
+  country_iso3: { required: true }
+  year: { required: true, min: 1990, max: 2100 }
+  series_code: { required: true, allowed: [PRODUCER_PI, CONSUMER_FOOD_PI] }
+  index_value: { required: true, min: 1, max: 1000 }
+  source_unit: { required: true }
+  rebase_factor: { required: true, min: 0.01, max: 100 }

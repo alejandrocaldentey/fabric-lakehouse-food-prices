@@ -13,6 +13,8 @@ SELECT
     t.consumer_food_yoy_pct AS consumer_food_price_change_pct,
     t.consumer_food_yoy_pct - t.producer_yoy_pct AS food_price_gap_pp,
     CASE WHEN ABS(t.producer_yoy_pct_lag1) >= 1 THEN t.consumer_food_yoy_pct / t.producer_yoy_pct_lag1 END AS pass_through_ratio_lag1,
+    t.producer_index AS producer_price_index,
+    t.consumer_food_index AS consumer_food_price_index,
     c.cpi_inflation AS headline_inflation_pct,
     t.consumer_food_yoy_pct - c.cpi_inflation AS food_inflation_premium_pp
 FROM gold_price_transmission AS t
