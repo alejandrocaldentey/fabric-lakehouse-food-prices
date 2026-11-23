@@ -32,6 +32,7 @@ from decisions import build as decisions_build
 from governance import build as governance_build
 from ingestion.http import build_session
 from metrics import build as metrics_build
+from ml import forecast
 
 ROOT = Path(__file__).resolve().parent.parent
 KEYED = ("food_price_country", "food_price_metric", "food_price_diamond", "food_price_index")
@@ -125,6 +126,7 @@ def platform_artifacts(con, stats: dict) -> list[dict]:
         {"name": "sources", "body": sources},
         {"name": "product", "body": product},
         {"name": "cost", "body": cost},
+        {"name": "models", "body": forecast.load_config()},
         {"name": "run", "body": stats},
     ]
     return [{"name": d["name"], "body": _jsonable(d["body"])} for d in docs]
