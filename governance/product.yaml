@@ -1,0 +1,27 @@
+# Data product descriptor (ADR 0007). Read by the governance portal (case 3) and rendered
+# with the lineage into docs/governance.md by `python -m governance.build`.
+product:
+  name: food-price-transmission
+  title: Food price transmission in Europe
+  domain: Agri-food economics
+  owner: Alejandro Caldentey
+  purpose: Show how changes in farm-gate prices reach consumer food prices, by country and year.
+  consumers:
+    - Power BI semantic model (Fabric, Direct Lake)
+    - Public dashboard (Vercel, read-only API on Supabase)
+    - Fabric data agent (natural-language questions)
+  classification: public            # public | internal | confidential | restricted
+  personal_data: false
+  licence: Derived from Eurostat (reuse with attribution) and World Bank (CC BY 4.0)
+  sla:
+    freshness: weekly                # source publication is annual; refresh is weekly
+    availability: best effort (portfolio)
+  output_ports:
+    - table: diamond_country_year
+      description: Certified metrics, one row per country and year
+      contract: quality/contracts/diamond_country_year.yaml
+      metrics: metrics/metrics.yaml
+    - table: gold_price_transmission
+      description: Producer vs consumer food price changes, side by side
+      contract: quality/contracts/gold_price_transmission.yaml
+  input_ports: ingestion/sources.yaml
