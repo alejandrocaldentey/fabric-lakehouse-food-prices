@@ -4,7 +4,7 @@ from quality.check import ContractViolation
 from transform import run_local
 from transform.staging import stage_eurostat
 
-PRODUCER = "apri_pi20_outa"
+PRODUCER = "apri_pi_outa"
 FOOD = "prc_hicp_aind"
 
 

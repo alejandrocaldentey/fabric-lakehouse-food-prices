@@ -9,9 +9,9 @@
 sources:
   - id: eurostat_producer_prices
     api: eurostat
-    dataset: apri_pi20_outa
-    description: Price indices of agricultural products, output (2020 = 100), annual
-    filters: { p_adj: NI, unit: I20, product: "140000" }
+    dataset: apri_pi_outa
+    description: Price indices of agricultural products, output - agricultural goods incl. fruit and vegetables (2020 = 100), annual
+    filters: { p_adj: NI, unit: I20, am_item: AM140000 }
     series_code: PRODUCER_PI
     load: { strategy: window_merge, window_years: 3 }
 
