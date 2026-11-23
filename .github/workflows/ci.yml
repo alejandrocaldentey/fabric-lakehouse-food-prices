@@ -41,3 +41,20 @@ jobs:
         run: pytest -m live -q tests/test_worldbank.py
       - name: Live Eurostat API (blocking)
         run: pytest -m live -q tests/test_eurostat.py
+
+  publish:
+    # Builds Diamond from live data and upserts it into the public Supabase demo (ADR 0008).
+    needs: live-smoke
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: https://urfygzyojmdrohqulvod.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Publish Diamond to Supabase (no-op until the secret is set)
+        run: python -m publish.supabase
