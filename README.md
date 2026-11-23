@@ -1,6 +1,6 @@
 # Food Price Transmission — a Lakehouse on Microsoft Fabric
 
-> **Status: 🚧 work in progress (phase 0 — scaffolding).** Architecture decisions are being recorded as ADRs before any platform code lands.
+> **Status: 🚧 work in progress.** Ingestion, silver and gold run and are tested locally; Fabric deployment is next.
 
 ## The question
 
@@ -29,7 +29,7 @@ flowchart LR
     GH -. deploys dev → prod .-> Fabric
 ```
 
-See [docs/architecture.md](docs/architecture.md) for the full data flow.
+See [docs/architecture.md](docs/architecture.md) for the full data flow and [docs/data-model.md](docs/data-model.md) for the silver and gold model.
 
 ## Decisions
 
@@ -37,6 +37,7 @@ See [docs/architecture.md](docs/architecture.md) for the full data flow.
 |---|---|---|
 | [0001](docs/adr/0001-platform-choice.md) | Data platform: Microsoft Fabric vs Databricks vs Snowflake | Accepted |
 | [0002](docs/adr/0002-cicd-github-actions.md) | CI/CD: GitHub Actions + fabric-cicd vs Azure DevOps | Accepted |
+| [0003](docs/adr/0003-portable-sql-transformations.md) | Transformations: portable SQL tested on DuckDB vs PySpark vs dbt | Proposed |
 
 ## Cost
 
@@ -47,8 +48,8 @@ Every process and tool is costed across three scenarios — **Demo**, **SME** an
 ```
 docs/          architecture, ADRs, cost report
 ingestion/     public API clients (incremental, with retries)
-transform/     bronze → silver → gold (Fabric notebooks)
-quality/       data contracts and tests
+transform/     portable SQL for silver and gold, seeds, local DuckDB runner
+quality/       data contracts, checked before gold is built
 infra/         Fabric workspace + fabric-cicd configuration
 cost/          cost model (YAML) and the script that renders docs/cost.md
 tests/         unit tests
@@ -59,7 +60,11 @@ tests/         unit tests
 ```bash
 pip install -e ".[dev]"
 pytest
-python -m ingestion.worldbank FP.CPI.TOTL.ZG --countries "ESP;FRA;DEU" --dates 2015:2024
+
+# pull bronze from the live APIs, then build silver and gold on DuckDB
+python -m ingestion.worldbank FP.CPI.TOTL.ZG --countries "ESP;FRA;DEU" --dates 2015:2024 > wb.jsonl
+python -m ingestion.faostat PP --areas 203 --years 2020,2021,2022 > fao.jsonl
+python -m transform.run_local --worldbank wb.jsonl --faostat fao.jsonl --out data/gold
 ```
 
 ## Data sources and licences
