@@ -1,0 +1,9 @@
+# Data contract for gold_price_transmission.
+table: gold_price_transmission
+owner: Alejandro Caldentey
+primary_key: [country_iso3, year]
+columns:
+  country_iso3: { required: true }
+  year: { required: true, min: 2000, max: 2100 }
+  producer_yoy_pct: { required: false, min: -90, max: 500 }
+  consumer_food_yoy_pct: { required: false, min: -90, max: 500 }

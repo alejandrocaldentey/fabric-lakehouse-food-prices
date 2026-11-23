@@ -26,12 +26,8 @@ from transform.staging import (
 ROOT = Path(__file__).resolve().parent
 SQL_DIR = ROOT / "sql"
 SEED_DIR = ROOT / "seeds"
-CONTRACTS = {
-    "silver_price_observation": ROOT.parent
-    / "quality"
-    / "contracts"
-    / "silver_price_observation.yaml"
-}
+# every table with a contract in quality/contracts/ is checked right after it is built
+CONTRACTS = {p.stem: p for p in (ROOT.parent / "quality" / "contracts").glob("*.yaml")}
 
 
 def _create(
@@ -113,7 +109,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     con = build(_read_jsonl(args.worldbank), _read_jsonl(args.eurostat))
     args.out.mkdir(parents=True, exist_ok=True)
-    for table in ("dim_country", "dim_series", "fact_price_annual", "gold_price_transmission"):
+    for table in (
+        "dim_country",
+        "dim_series",
+        "fact_price_annual",
+        "gold_price_transmission",
+        "diamond_country_year",
+    ):
         con.execute(f"COPY {table} TO '{args.out / table}.parquet' (FORMAT PARQUET)")
         count = con.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
         print(f"{table}: {count} rows")

@@ -1,0 +1,62 @@
+# Metric catalogue — the single definition of every number this product publishes (ADR 0006).
+#
+# `python -m metrics.build` generates from this file:
+#   transform/sql/06_diamond_country_year.sql  (the materialised Diamond table)
+#   docs/metrics.md                             (the human-readable catalogue)
+# Later: DAX measures for the Fabric semantic model and the API views for the public demo.
+#
+# Expressions are portable SQL over two aliases:
+#   t = gold_price_transmission (one row per country and year)
+#   c = consumer price inflation, all items (World Bank)
+
+table: diamond_country_year
+grain: [country_iso3, year]
+
+metrics:
+  - name: producer_price_change_pct
+    label: Farm-gate price change
+    description: Year-on-year change of the agricultural output price index (agricultural goods incl. fruit and vegetables).
+    unit: "%"
+    expression: t.producer_yoy_pct
+    status: certified
+    owner: Alejandro Caldentey
+
+  - name: consumer_food_price_change_pct
+    label: Consumer food price change
+    description: Year-on-year change of the HICP for food and non-alcoholic beverages.
+    unit: "%"
+    expression: t.consumer_food_yoy_pct
+    status: certified
+    owner: Alejandro Caldentey
+
+  - name: food_price_gap_pp
+    label: Consumer vs farm-gate gap
+    description: Consumer food price change minus farm-gate price change. Positive means consumers paid more than the farm-gate change explains.
+    unit: pp
+    expression: t.consumer_food_yoy_pct - t.producer_yoy_pct
+    status: certified
+    owner: Alejandro Caldentey
+
+  - name: pass_through_ratio_lag1
+    label: Pass-through ratio (1-year lag)
+    description: Consumer food price change this year per point of farm-gate change last year. Undefined when last year's farm-gate change was under 1 point, where the ratio explodes.
+    unit: ratio
+    expression: CASE WHEN ABS(t.producer_yoy_pct_lag1) >= 1 THEN t.consumer_food_yoy_pct / t.producer_yoy_pct_lag1 END
+    status: experimental
+    owner: Alejandro Caldentey
+
+  - name: headline_inflation_pct
+    label: Headline inflation
+    description: Consumer price inflation, all items (World Bank).
+    unit: "%"
+    expression: c.cpi_inflation
+    status: certified
+    owner: Alejandro Caldentey
+
+  - name: food_inflation_premium_pp
+    label: Food inflation premium
+    description: Consumer food price change minus headline inflation. Positive means food rose faster than the overall basket.
+    unit: pp
+    expression: t.consumer_food_yoy_pct - c.cpi_inflation
+    status: certified
+    owner: Alejandro Caldentey

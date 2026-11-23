@@ -1,0 +1,8 @@
+# Data contract for the Diamond table: what consumers (BI, API, agents) can rely on.
+table: diamond_country_year
+owner: Alejandro Caldentey
+primary_key: [country_iso3, year]
+columns:
+  country_iso3: { required: true }
+  year: { required: true, min: 2000, max: 2100 }
+  pass_through_ratio_lag1: { required: false, min: -50, max: 50 }
