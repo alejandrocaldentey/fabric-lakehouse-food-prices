@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Food price transmission",
+    "description": "Certified food price transmission metrics for 27 European countries, Direct Lake on the gold lakehouse."
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "e1ca7452-38a9-5e15-a54a-63cd79f48f98"
+  }
+}

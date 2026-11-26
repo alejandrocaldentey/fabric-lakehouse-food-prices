@@ -1,0 +1,11 @@
+relationship b1a44e2b-ce59-5ed2-ada9-0ad42a7e9563
+	fromColumn: fact_price_annual.country_iso3
+	toColumn: dim_country.country_iso3
+
+relationship 7fefbfa9-dd5d-52ad-ad49-2be017ef5fcf
+	fromColumn: fact_price_annual.series_code
+	toColumn: dim_series.series_code
+
+relationship 7ed83d65-3a7e-5ba4-95a1-7ffd270a0951
+	fromColumn: diamond_country_year.country_iso3
+	toColumn: dim_country.country_iso3

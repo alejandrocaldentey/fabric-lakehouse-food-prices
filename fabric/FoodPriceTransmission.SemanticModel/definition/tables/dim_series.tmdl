@@ -1,0 +1,48 @@
+/// The price series the lakehouse measures.
+table dim_series
+	lineageTag: 99bb34a3-deec-54a8-9787-29a0aa85ded0
+	sourceLineageTag: [dbo].[dim_series]
+
+	/// Series key used in fact_price_annual.
+	column series_code
+		dataType: string
+		lineageTag: f85757cf-62bf-5722-ab6e-89e4cc73afa2
+		sourceLineageTag: series_code
+		summarizeBy: none
+		sourceColumn: series_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column description
+		dataType: string
+		lineageTag: 1866d3ba-172c-5361-be15-3c23968bd14e
+		sourceLineageTag: description
+		summarizeBy: none
+		sourceColumn: description
+
+		annotation SummarizationSetBy = Automatic
+
+	column unit
+		dataType: string
+		lineageTag: de955831-e585-54fc-9a9e-4de7c79eb49d
+		sourceLineageTag: unit
+		summarizeBy: none
+		sourceColumn: unit
+
+		annotation SummarizationSetBy = Automatic
+
+	column source
+		dataType: string
+		lineageTag: 499208e4-9a1c-5695-b055-3c9d971d711e
+		sourceLineageTag: source
+		summarizeBy: none
+		sourceColumn: source
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_series = entity
+		mode: directLake
+		source
+			entityName: dim_series
+			schemaName: dbo
+			expressionSource: 'DirectLake - lh_food_prices'

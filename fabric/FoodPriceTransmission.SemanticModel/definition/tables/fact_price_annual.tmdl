@@ -1,0 +1,59 @@
+/// Annual value per country and series. Index series are chain-linked and rebased to 2020 = 100.
+table fact_price_annual
+	lineageTag: a1ba551c-dad9-585a-80e7-50d73009047d
+	sourceLineageTag: [dbo].[fact_price_annual]
+
+	column country_iso3
+		dataType: string
+		isHidden
+		lineageTag: d44776f0-1296-54a8-90a0-5bc41920b3ae
+		sourceLineageTag: country_iso3
+		summarizeBy: none
+		sourceColumn: country_iso3
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		lineageTag: f95e5be0-27dc-539e-a1c9-e679efbdc4ee
+		sourceLineageTag: year
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	column series_code
+		dataType: string
+		isHidden
+		lineageTag: efdd326d-7f18-5c14-b6fe-9f7e58dccfd3
+		sourceLineageTag: series_code
+		summarizeBy: none
+		sourceColumn: series_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column value
+		dataType: double
+		lineageTag: 846c8712-22c6-5ec1-aa2f-ec923b03e763
+		sourceLineageTag: value
+		summarizeBy: none
+		sourceColumn: value
+
+		annotation SummarizationSetBy = Automatic
+
+	column n_items
+		dataType: int64
+		isHidden
+		lineageTag: 42f6659a-54bb-5c0f-a7e6-4f0ff0e29fe6
+		sourceLineageTag: n_items
+		summarizeBy: none
+		sourceColumn: n_items
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_price_annual = entity
+		mode: directLake
+		source
+			entityName: fact_price_annual
+			schemaName: dbo
+			expressionSource: 'DirectLake - lh_food_prices'

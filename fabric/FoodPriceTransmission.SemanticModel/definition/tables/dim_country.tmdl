@@ -1,0 +1,31 @@
+/// One row per country with at least one observation.
+table dim_country
+	lineageTag: f9adf0de-05ba-5c15-95fe-329fb4b62052
+	sourceLineageTag: [dbo].[dim_country]
+
+	/// ISO 3166-1 alpha-3 code.
+	column country_iso3
+		dataType: string
+		lineageTag: 761ac3c1-1415-5600-9704-42187fe8343c
+		sourceLineageTag: country_iso3
+		summarizeBy: none
+		sourceColumn: country_iso3
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Country name in English.
+	column country_name
+		dataType: string
+		lineageTag: cdb2496b-3f1b-5418-8f84-229007d40c52
+		sourceLineageTag: country_name
+		summarizeBy: none
+		sourceColumn: country_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_country = entity
+		mode: directLake
+		source
+			entityName: dim_country
+			schemaName: dbo
+			expressionSource: 'DirectLake - lh_food_prices'

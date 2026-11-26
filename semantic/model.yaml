@@ -1,0 +1,54 @@
+# Semantic model definition (ADR 0013). `python -m semantic.build` turns this file, the metric
+# catalogue (metrics/metrics.yaml) and the column types of the tables the pipeline actually
+# builds into a TMDL semantic model that Fabric Git integration and fabric-cicd can deploy.
+#
+# Nothing here repeats a metric formula: measures come from the catalogue, columns from the SQL.
+
+name: FoodPriceTransmission
+display_name: Food price transmission
+description: Certified food price transmission metrics for 27 European countries, Direct Lake on the gold lakehouse.
+
+# Direct Lake on OneLake. The two ids are placeholders that the deployment replaces per
+# environment (fabric-cicd parameter file, backlog item "Fabric workspace and dev -> prod").
+source:
+  expression: DirectLake - lh_food_prices
+  workspace_id: 00000000-0000-0000-0000-000000000000
+  lakehouse_id: 00000000-0000-0000-0000-000000000001
+  schema: dbo
+
+# Tables in the model, in display order. `hidden` columns stay in the model for relationships
+# and lineage but are not offered to report authors or to the data agent.
+tables:
+  dim_country:
+    description: One row per country with at least one observation.
+    columns:
+      country_iso3: { description: ISO 3166-1 alpha-3 code. }
+      country_name: { description: Country name in English. }
+
+  dim_series:
+    description: The price series the lakehouse measures.
+    columns:
+      series_code: { description: Series key used in fact_price_annual. }
+
+  fact_price_annual:
+    description: Annual value per country and series. Index series are chain-linked and rebased to 2020 = 100.
+    hidden_columns: [country_iso3, series_code, n_items]
+
+  diamond_country_year:
+    description: Certified metrics, one row per country and year. Read the measures, not the columns.
+    measures_from_catalogue: true
+    # every metric column is hidden: the measure is the only governed way to read a metric
+    hide_metric_columns: true
+    hidden_columns: [country_iso3]
+
+relationships:
+  - { from: fact_price_annual.country_iso3, to: dim_country.country_iso3 }
+  - { from: fact_price_annual.series_code, to: dim_series.series_code }
+  - { from: diamond_country_year.country_iso3, to: dim_country.country_iso3 }
+
+# Number formats by catalogue unit. A unit without an entry fails the build.
+formats:
+  "%": '0.0"%"'
+  pp: '+0.0" pp";-0.0" pp";0.0" pp"'
+  ratio: "0.00"
+  index (2020 = 100): "0.0"

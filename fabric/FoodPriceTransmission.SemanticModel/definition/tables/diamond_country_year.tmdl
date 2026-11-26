@@ -1,0 +1,222 @@
+/// Certified metrics, one row per country and year. Read the measures, not the columns.
+table diamond_country_year
+	lineageTag: b4242b5f-f281-5aa4-ba7b-7080518dc736
+	sourceLineageTag: [dbo].[diamond_country_year]
+
+	/// Year-on-year change of the agricultural output price index (agricultural goods incl. fruit and vegetables).
+	measure 'Farm-gate price change' =
+			// producer_price_change_pct · certified · metrics/metrics.yaml
+			// Above the grain: unweighted mean of the country-year values in the filter.
+			AVERAGE ( diamond_country_year[producer_price_change_pct] )
+		formatString: 0.0"%"
+		displayFolder: Certified
+		lineageTag: 85e8da13-a199-5d41-bf82-77949517b607
+
+		annotation catalogue_metric = producer_price_change_pct
+
+		annotation catalogue_status = certified
+
+	/// Year-on-year change of the HICP for food and non-alcoholic beverages.
+	measure 'Consumer food price change' =
+			// consumer_food_price_change_pct · certified · metrics/metrics.yaml
+			// Above the grain: unweighted mean of the country-year values in the filter.
+			AVERAGE ( diamond_country_year[consumer_food_price_change_pct] )
+		formatString: 0.0"%"
+		displayFolder: Certified
+		lineageTag: 331a327b-060c-55ea-99be-4346df55e239
+
+		annotation catalogue_metric = consumer_food_price_change_pct
+
+		annotation catalogue_status = certified
+
+	/// Consumer food price change minus farm-gate price change. Positive means consumers paid more than the farm-gate change explains.
+	measure 'Consumer vs farm-gate gap' =
+			// food_price_gap_pp · certified · metrics/metrics.yaml
+			// Above the grain: unweighted mean of the country-year values in the filter.
+			AVERAGE ( diamond_country_year[food_price_gap_pp] )
+		formatString: +0.0" pp";-0.0" pp";0.0" pp"
+		displayFolder: Certified
+		lineageTag: 17d1fbcd-fce5-5965-ac31-f3f7124566d7
+
+		annotation catalogue_metric = food_price_gap_pp
+
+		annotation catalogue_status = certified
+
+	/// Consumer food price change this year per point of farm-gate change last year. Undefined when last year's farm-gate change was under 1 point, where the ratio explodes.
+	measure 'Pass-through ratio (1-year lag)' =
+			// pass_through_ratio_lag1 · experimental · metrics/metrics.yaml
+			// Defined at the grain only: blank unless exactly one country and year is selected.
+			IF ( COUNTROWS ( diamond_country_year ) = 1, MAX ( diamond_country_year[pass_through_ratio_lag1] ) )
+		formatString: 0.00
+		displayFolder: Experimental
+		lineageTag: b3fb5f9e-a559-53d8-969e-c4374cfe6f4b
+
+		annotation catalogue_metric = pass_through_ratio_lag1
+
+		annotation catalogue_status = experimental
+
+	/// Agricultural output price index, chain-linked across Eurostat bases and rebased to 2020 = 100. Compare levels with the consumer index directly.
+	measure 'Farm-gate price level' =
+			// producer_price_index · certified · metrics/metrics.yaml
+			// Above the grain: unweighted mean of the country-year values in the filter.
+			AVERAGE ( diamond_country_year[producer_price_index] )
+		formatString: 0.0
+		displayFolder: Certified
+		lineageTag: 897936bd-3d90-5933-8813-8a70a2e828bf
+
+		annotation catalogue_metric = producer_price_index
+
+		annotation catalogue_status = certified
+
+	/// HICP food and non-alcoholic beverages, rebased to 2020 = 100.
+	measure 'Consumer food price level' =
+			// consumer_food_price_index · certified · metrics/metrics.yaml
+			// Above the grain: unweighted mean of the country-year values in the filter.
+			AVERAGE ( diamond_country_year[consumer_food_price_index] )
+		formatString: 0.0
+		displayFolder: Certified
+		lineageTag: da3700a1-ad65-5217-9f8c-22c541b3928f
+
+		annotation catalogue_metric = consumer_food_price_index
+
+		annotation catalogue_status = certified
+
+	/// Consumer price inflation, all items (World Bank).
+	measure 'Headline inflation' =
+			// headline_inflation_pct · certified · metrics/metrics.yaml
+			// Above the grain: unweighted mean of the country-year values in the filter.
+			AVERAGE ( diamond_country_year[headline_inflation_pct] )
+		formatString: 0.0"%"
+		displayFolder: Certified
+		lineageTag: 426001e2-9b15-5bda-9ff3-5e20f73a1253
+
+		annotation catalogue_metric = headline_inflation_pct
+
+		annotation catalogue_status = certified
+
+	/// Consumer food price change minus headline inflation. Positive means food rose faster than the overall basket.
+	measure 'Food inflation premium' =
+			// food_inflation_premium_pp · certified · metrics/metrics.yaml
+			// Above the grain: unweighted mean of the country-year values in the filter.
+			AVERAGE ( diamond_country_year[food_inflation_premium_pp] )
+		formatString: +0.0" pp";-0.0" pp";0.0" pp"
+		displayFolder: Certified
+		lineageTag: 1179e047-2690-585c-af51-fb3a182af65f
+
+		annotation catalogue_metric = food_inflation_premium_pp
+
+		annotation catalogue_status = certified
+
+	column country_iso3
+		dataType: string
+		isHidden
+		lineageTag: 6f25d779-06c9-5876-a5f3-4e81f68aa911
+		sourceLineageTag: country_iso3
+		summarizeBy: none
+		sourceColumn: country_iso3
+
+		annotation SummarizationSetBy = Automatic
+
+	column year
+		dataType: int64
+		lineageTag: 7ca0a7fb-9b6e-56c3-9df6-a333e5de6e99
+		sourceLineageTag: year
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Year-on-year change of the agricultural output price index (agricultural goods incl. fruit and vegetables).
+	column producer_price_change_pct
+		dataType: double
+		isHidden
+		lineageTag: 0597edeb-f8a2-5fe1-a42e-f247dd583e46
+		sourceLineageTag: producer_price_change_pct
+		summarizeBy: none
+		sourceColumn: producer_price_change_pct
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Year-on-year change of the HICP for food and non-alcoholic beverages.
+	column consumer_food_price_change_pct
+		dataType: double
+		isHidden
+		lineageTag: 5bb6d179-fc3f-550c-907b-e7b4104f30ce
+		sourceLineageTag: consumer_food_price_change_pct
+		summarizeBy: none
+		sourceColumn: consumer_food_price_change_pct
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Consumer food price change minus farm-gate price change. Positive means consumers paid more than the farm-gate change explains.
+	column food_price_gap_pp
+		dataType: double
+		isHidden
+		lineageTag: 566f4b3a-a74e-5de0-bf4c-de483bd6f576
+		sourceLineageTag: food_price_gap_pp
+		summarizeBy: none
+		sourceColumn: food_price_gap_pp
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Consumer food price change this year per point of farm-gate change last year. Undefined when last year's farm-gate change was under 1 point, where the ratio explodes.
+	column pass_through_ratio_lag1
+		dataType: double
+		isHidden
+		lineageTag: 895ce82c-7401-5a66-9d2d-d723b172ef7f
+		sourceLineageTag: pass_through_ratio_lag1
+		summarizeBy: none
+		sourceColumn: pass_through_ratio_lag1
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Agricultural output price index, chain-linked across Eurostat bases and rebased to 2020 = 100. Compare levels with the consumer index directly.
+	column producer_price_index
+		dataType: double
+		isHidden
+		lineageTag: ab2b6a61-5526-5fc7-b390-5a30c9c2e585
+		sourceLineageTag: producer_price_index
+		summarizeBy: none
+		sourceColumn: producer_price_index
+
+		annotation SummarizationSetBy = Automatic
+
+	/// HICP food and non-alcoholic beverages, rebased to 2020 = 100.
+	column consumer_food_price_index
+		dataType: double
+		isHidden
+		lineageTag: a37cf41a-49e4-5957-a2fd-1d308d565561
+		sourceLineageTag: consumer_food_price_index
+		summarizeBy: none
+		sourceColumn: consumer_food_price_index
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Consumer price inflation, all items (World Bank).
+	column headline_inflation_pct
+		dataType: double
+		isHidden
+		lineageTag: 226ed3ff-ba11-52fd-95db-2694d21aabbc
+		sourceLineageTag: headline_inflation_pct
+		summarizeBy: none
+		sourceColumn: headline_inflation_pct
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Consumer food price change minus headline inflation. Positive means food rose faster than the overall basket.
+	column food_inflation_premium_pp
+		dataType: double
+		isHidden
+		lineageTag: e349a5da-d001-5fc3-a6d0-ab25d79a4335
+		sourceLineageTag: food_inflation_premium_pp
+		summarizeBy: none
+		sourceColumn: food_inflation_premium_pp
+
+		annotation SummarizationSetBy = Automatic
+
+	partition diamond_country_year = entity
+		mode: directLake
+		source
+			entityName: diamond_country_year
+			schemaName: dbo
+			expressionSource: 'DirectLake - lh_food_prices'

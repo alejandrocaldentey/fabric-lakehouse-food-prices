@@ -14,7 +14,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["ingestion*", "cost*", "transform*", "quality*", "metrics*", "ml*", "decisions*", "governance*", "publish*"]
+include = ["ingestion*", "cost*", "transform*", "quality*", "metrics*", "ml*", "decisions*", "governance*", "publish*", "semantic*"]
 
 [tool.ruff]
 line-length = 100

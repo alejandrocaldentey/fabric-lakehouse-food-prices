@@ -1,0 +1,8 @@
+expression 'DirectLake - lh_food_prices' =
+		let
+		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000001", [HierarchicalNavigation=true])
+		in
+		    Source
+	lineageTag: 39dfb57d-821f-5012-a1f5-48fd2e094ca4
+
+	annotation PBI_IncludeFutureArtifacts = False
