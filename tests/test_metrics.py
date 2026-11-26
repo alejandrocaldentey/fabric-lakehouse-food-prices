@@ -21,6 +21,17 @@ def test_duplicate_metric_names_are_rejected(tmp_path):
         build.load(path)
 
 
+def test_unknown_rollup_is_rejected(tmp_path):
+    import yaml
+
+    cat = build.load()
+    cat["metrics"][0]["rollup"] = "sum"
+    path = tmp_path / "m.yaml"
+    path.write_text(yaml.safe_dump(cat))
+    with pytest.raises(build.CatalogueError, match="rollup"):
+        build.load(path)
+
+
 def test_diamond_matches_catalogue_definitions():
     from tests.test_transform import es, wb  # reuse the hand-checked bronze rows
     from transform import run_local

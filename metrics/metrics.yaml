@@ -3,7 +3,11 @@
 # `python -m metrics.build` generates from this file:
 #   transform/sql/07_diamond_country_year.sql  (the materialised Diamond table)
 #   docs/metrics.md                             (the human-readable catalogue)
-# Later: DAX measures for the Fabric semantic model and the API views for the public demo.
+#   fabric/FoodPriceTransmission.SemanticModel/  (DAX measures, via `python -m semantic.build`)
+#
+# `rollup` says how a metric behaves above its grain (several countries or years selected):
+#   mean  unweighted mean of the country-year values (the default)
+#   none  only defined at the grain; blank when more than one country-year is selected
 #
 # Expressions are portable SQL over two aliases:
 #   t = gold_price_transmission (one row per country and year)
@@ -42,6 +46,7 @@ metrics:
     description: Consumer food price change this year per point of farm-gate change last year. Undefined when last year's farm-gate change was under 1 point, where the ratio explodes.
     unit: ratio
     expression: CASE WHEN ABS(t.producer_yoy_pct_lag1) >= 1 THEN t.consumer_food_yoy_pct / t.producer_yoy_pct_lag1 END
+    rollup: none
     status: experimental
     owner: Alejandro Caldentey
 

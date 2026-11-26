@@ -20,7 +20,11 @@ DOC_OUT = ROOT / "docs" / "metrics.md"
 
 NAME = re.compile(r"^[a-z][a-z0-9_]*$")
 STATUSES = {"certified", "experimental", "deprecated"}
+ROLLUPS = {"mean", "none"}
 REQUIRED = ("name", "label", "description", "unit", "expression", "status", "owner")
+
+
+ROLLUP_LABELS = {"mean": "unweighted mean", "none": "blank"}
 
 
 class CatalogueError(ValueError):
@@ -38,6 +42,9 @@ def load(path: Path = CATALOGUE) -> dict:
             raise CatalogueError(f"metric name {m['name']!r} is invalid or duplicated")
         if m["status"] not in STATUSES:
             raise CatalogueError(f"metric {m['name']!r} has unknown status {m['status']!r}")
+        m.setdefault("rollup", "mean")
+        if m["rollup"] not in ROLLUPS:
+            raise CatalogueError(f"metric {m['name']!r} has unknown rollup {m['rollup']!r}")
         seen.add(m["name"])
     return catalogue
 
@@ -73,14 +80,14 @@ def render_doc(catalogue: dict) -> str:
             f"(grain: {', '.join(catalogue['grain'])})."
         ),
         "",
-        "| Metric | Label | Unit | Status | Definition | Owner |",
-        "|---|---|---|---|---|---|",
+        "| Metric | Label | Unit | Status | Above the grain | Definition | Owner |",
+        "|---|---|---|---|---|---|---|",
     ]
     for m in catalogue["metrics"]:
         expr = m["expression"].replace("|", "\\|")
         lines.append(
             f"| `{m['name']}` | {m['label']} | {m['unit']} | {m['status']} | "
-            f"{m['description']}<br>`{expr}` | {m['owner']} |"
+            f"{ROLLUP_LABELS[m['rollup']]} | {m['description']}<br>`{expr}` | {m['owner']} |"
         )
     return "\n".join(lines) + "\n"
 
