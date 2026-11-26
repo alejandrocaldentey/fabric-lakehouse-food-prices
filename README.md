@@ -1,6 +1,6 @@
 # Food Price Transmission — a Lakehouse on Microsoft Fabric
 
-> **Status: 🚧 work in progress.** Ingestion, silver, gold, Diamond, the predictive and the decision layers run on live Eurostat and World Bank data, are tested in CI and publish to a **[live demo](https://food-price-transmission-dashboard.vercel.app)**. Fabric deployment is next.
+> **Status: 🚧 work in progress.** Ingestion, silver, gold, Diamond, the predictive and the decision layers run on live Eurostat and World Bank data, are tested in CI and publish to a **[live demo](https://food-price-transmission-dashboard.vercel.app)**. The Direct Lake semantic model is generated as code; Fabric deployment is next.
 
 ## The question
 
@@ -32,7 +32,7 @@ flowchart LR
     GH -. deploys dev → prod .-> Fabric
 ```
 
-See [architecture](docs/architecture.md), [data model](docs/data-model.md), [metric catalogue](docs/metrics.md), [decision layer](docs/decisions.md) and [governance](docs/governance.md).
+See [architecture](docs/architecture.md), [data model](docs/data-model.md), [metric catalogue](docs/metrics.md), [semantic model](docs/semantic-model.md), [decision layer](docs/decisions.md) and [governance](docs/governance.md).
 
 ## Decisions
 
@@ -50,6 +50,7 @@ See [architecture](docs/architecture.md), [data model](docs/data-model.md), [met
 | [0010](docs/adr/0010-chain-linked-price-indices.md) | Chain-link the five Eurostat index bases and rebase to 2020 = 100 | Accepted |
 | [0011](docs/adr/0011-model-selection-champion-challenger.md) | Three models, rolling-origin backtest, simplest champion within tolerance | Accepted |
 | [0012](docs/adr/0012-decision-layer.md) | Alert rules as code and playbooks per technical role | Accepted |
+| [0013](docs/adr/0013-direct-lake-semantic-model.md) | Semantic model: Direct Lake on OneLake, generated as TMDL from the metric catalogue | Proposed |
 
 ## What the predictive layer found
 
@@ -67,6 +68,8 @@ ingestion/     public API clients, source registry and load plans
 transform/     portable SQL for silver and gold, seeds, local DuckDB runner
 quality/       data contracts per layer, checked as each table is built
 metrics/       metric catalogue that generates the Diamond table and docs
+semantic/      semantic model spec and the generator of TMDL, DAX measures and data agent instructions
+fabric/        generated Fabric items (Direct Lake semantic model) and data agent instructions
 ml/            model catalogue, backtest, champion selection and forecast
 decisions/     alert rules and role playbooks that generate the alert SQL and docs
 publish/       atomic publisher to the public demo (keyed + snapshot tables)
@@ -87,7 +90,7 @@ pytest
 python -m transform.pipeline --out data/gold
 
 # regenerate code and docs from the catalogues (CI fails if they are stale)
-python -m metrics.build && python -m decisions.build && python -m governance.build && python -m cost.render
+python -m metrics.build && python -m semantic.build && python -m decisions.build && python -m governance.build && python -m cost.render
 ```
 
 ## Data sources and licences

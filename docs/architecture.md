@@ -10,8 +10,8 @@
 | Diamond | `diamond_country_year` | Certified metrics generated from the catalogue ([ADR 0006](adr/0006-diamond-metrics-layer.md)) | Delta |
 | Predictive | `ml_*` | Three models, rolling-origin backtest, champion, forecast with 80% interval, published coefficients ([ADR 0011](adr/0011-model-selection-champion-challenger.md)) | Delta |
 | Decision | `decision_*` | Alert rules compiled from YAML; role playbooks ([ADR 0012](adr/0012-decision-layer.md)) | Delta |
-| Serving | Semantic model (Direct Lake) and the public demo (Supabase + Vercel) | Certified measures, forecasts and alerts; the demo applies published coefficients only ([ADR 0009](adr/0009-where-predictions-and-alerts-run.md)) | — |
-| AI | Fabric data agent | Natural-language questions over the semantic model | — |
+| Serving | Semantic model (Direct Lake on OneLake, TMDL generated from the catalogue — [ADR 0013](adr/0013-direct-lake-semantic-model.md), [reference](semantic-model.md)) and the public demo (Supabase + Vercel) | Certified measures, forecasts and alerts; the demo applies published coefficients only ([ADR 0009](adr/0009-where-predictions-and-alerts-run.md)) | — |
+| AI | Fabric data agent | Natural-language questions over the semantic model's measures only; instructions generated from the catalogue ([`fabric/data-agent/`](../fabric/data-agent/instructions.md)) | — |
 
 ## Flow
 
