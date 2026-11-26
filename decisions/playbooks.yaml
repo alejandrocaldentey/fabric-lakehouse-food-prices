@@ -3,7 +3,8 @@
 # because an alert nobody can act on is noise. The decision stays with the business owner;
 # the data team owns the evidence. `exposure` says which P&L line the signal touches
 # (cost, price, volume) or whether it is about trust in the numbers.
-# Reviewed and approved by Alejandro Caldentey on 2026-11-26. Rendered into docs/decisions.md.
+# Provisionally approved by Alejandro Caldentey on 2026-11-26; a detailed review is pending.
+# Rendered into docs/decisions.md.
 
 roles:
 - id: hod_manufacturer
