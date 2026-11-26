@@ -20,6 +20,8 @@ DOC_OUT = ROOT / "docs" / "decisions.md"
 
 SEVERITIES = ("high", "medium")
 CATEGORIES = {"market", "forecast", "data", "model"}
+EXPOSURES = {"cost", "price", "volume", "trust"}
+PLAY_FIELDS = {"question", "data", "kpi", "horizon", "exposure"}
 
 
 class RuleError(ValueError):
@@ -47,6 +49,13 @@ def load() -> tuple[list[dict], dict]:
         unknown = set(plays) - roles
         if unknown:
             raise RuleError(f"playbook {rule_id}: unknown roles {sorted(unknown)}")
+        for role_id, play in plays.items():
+            if set(play) != PLAY_FIELDS:
+                raise RuleError(f"play {rule_id}/{role_id}: fields must be {sorted(PLAY_FIELDS)}")
+            if play["exposure"] not in EXPOSURES:
+                raise RuleError(
+                    f"play {rule_id}/{role_id}: exposure must be one of {sorted(EXPOSURES)}"
+                )
     return rules, books
 
 
@@ -127,7 +136,8 @@ def render_doc(rules: list[dict], books: dict) -> str:
         ]
         for role_id, p in plays.items():
             lines.append(
-                f"| {roles[role_id]['label']} | {p['business']} | {p['data']} | {p['kpi']} | {p['horizon']} |"
+                f"| {roles[role_id]['label']} | {p['question']} | {p['data']} | {p['kpi']} | "
+                f"{p['horizon']} | {p['exposure']} |"
             )
     return "\n".join(lines) + "\n"
 

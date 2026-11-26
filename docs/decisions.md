@@ -25,56 +25,56 @@ Generated from [`decisions/rules.yaml`](../decisions/rules.yaml) and [`decisions
 
 | Role | Business action | Data action | KPI | Horizon |
 |---|---|---|---|---|
-| Head of Data · Food manufacturer | Re-run the COGS forecast and brief finance on the margin at risk before the next budget cycle. | Join this index to the bill of materials by commodity; publish cogs_inflation_pct in the semantic layer with the same lag the regression uses. | COGS inflation vs list-price inflation (pp) | 0-3 months |
-| Head of Data · Retailer or distributor | Expect supplier price-increase requests within two quarters; prepare category baselines now. | Build a supplier-request tracker that compares each requested increase with the farm-gate index of the product's inputs. | Requested increase minus input-cost increase (pp) | 3-6 months |
-| Procurement analytics lead | Decide whether to lock volume or shorten contracts; a shock this size usually partly reverses. | Add a contract-coverage view (volume locked vs forecast need by month) next to the index and the forecast interval. | Share of next 12 months' volume under fixed price | 0-3 months |
-| Pricing and revenue analytics lead | Plan staged price moves instead of one jump; consumers react to step changes more than to the total. | Simulate pass-through scenarios with the published coefficients against your price-elasticity model. | Volume at risk per point of price increase | 3-6 months |
+| Head of Data · Food manufacturer | How much margin is at risk if the shock reaches our input costs, and when does it hit COGS? | Join the farm-gate index to the bill of materials by commodity; publish cogs_inflation_pct in the semantic layer with the same one-year lag the model uses. | COGS inflation vs list-price inflation (pp) | 0-3 months | cost |
+| Head of Data · Retailer or distributor | Which supplier price-increase requests should we expect in the next two quarters, and how big should they be? | Supplier-request tracker comparing each requested increase with the farm-gate index of the product's inputs. | Requested increase minus input-cost increase (pp) | 3-6 months | cost |
+| Procurement analytics lead | Should we lock volume now or keep contracts short? Since 2001, after a farm-gate move of 10% or more, the next year's move was smaller in 77% of 148 cases and reversed in 41%. | Contract-coverage view (volume locked vs forecast need by month) next to the index and the forecast interval. | Share of next 12 months' volume under fixed price | 0-3 months | cost |
+| Pricing and revenue analytics lead | How much of this shock will reach our costs next year (about 0.25 points per point of farm-gate inflation), and how much volume would each point of price increase cost? | Simulate pass-through scenarios with the published coefficients against our price-elasticity model. | Volume at risk per point of price increase | 3-6 months | price |
 
 ## When `margin_squeeze` fires
 
 | Role | Business action | Data action | KPI | Horizon |
 |---|---|---|---|---|
-| Head of Data · Food manufacturer | Prioritise cost-to-serve and mix actions; list prices are lagging input costs. | Ship a margin bridge (price, volume, mix, input cost) at SKU level, refreshed with every index update. | Gross margin bridge by driver (pp) | 0-3 months |
-| Head of Data · Retailer or distributor | Suppliers are absorbing costs now and will push them through; anticipate a wave of renegotiations. | Score suppliers by exposure to the squeezed commodities so negotiators start with the riskiest. | Spend exposed to squeezed categories (%) | 3-6 months |
-| Procurement analytics lead | Use the squeeze in negotiations; suppliers' costs rose more than their prices. | Provide should-cost models per category built on the farm-gate index and the lag structure. | Should-cost vs quoted price (%) | 0-3 months |
-| Pricing and revenue analytics lead | Identify where a price move is justified by costs and defensible to buyers and consumers. | Rank SKUs by cost gap and elasticity to target increases where volume risk is lowest. | Margin recovered per point of volume lost | 0-3 months |
+| Head of Data · Food manufacturer | Which SKUs and drivers explain the margin loss, and which can we act on this quarter? | Margin bridge (price, volume, mix, input cost) per SKU, refreshed with every index update. | Gross margin bridge by driver (pp) | 0-3 months | cost |
+| Head of Data · Retailer or distributor | Which suppliers are absorbing costs now and most likely to push them through next? | Score suppliers by exposure to the squeezed commodities so negotiators start with the riskiest. | Spend exposed to squeezed categories (%) | 3-6 months | cost |
+| Procurement analytics lead | Are supplier quotes below what their inputs justify, and how long can that last? | Should-cost models per category built on the farm-gate index and its one-year lag. | Should-cost vs quoted price (%) | 0-3 months | cost |
+| Pricing and revenue analytics lead | Where is a price increase justified by costs and least likely to cost volume? | Rank SKUs by cost gap and price elasticity. | Margin recovered per point of volume lost | 0-3 months | price |
 
 ## When `margin_expansion` fires
 
 | Role | Business action | Data action | KPI | Horizon |
 |---|---|---|---|---|
-| Head of Data · Food manufacturer | Downstream margins are widening; expect retailers to push back on your next increase. | Evidence pack linking your price changes to input-cost changes, generated from governed metrics, not slides. | Your price change vs input-cost change (pp) | 3-6 months |
-| Head of Data · Retailer or distributor | Shelf prices are running ahead of costs; reputational and regulatory risk rises. | Monitor shelf-price vs input-cost gaps by category with alerts, and keep the lineage auditable for regulators. | Shelf vs farm-gate gap by category (pp) | 0-3 months |
-| Procurement analytics lead | Farm-gate costs are not the driver; look at energy, labour and logistics in supplier quotes. | Extend the cost model with energy and labour indices so quotes are decomposed by driver. | Share of quote increase explained by each driver | 3-6 months |
-| Pricing and revenue analytics lead | Room for promotions or price investment without hurting margin; competitors may move first. | Track competitor price indices against your own and the farm-gate index. | Price index vs competitors (base 100) | 0-3 months |
+| Head of Data · Food manufacturer | Can we justify our next price increase with input-cost evidence when retailers push back? | Evidence pack linking our price changes to input-cost changes, generated from governed metrics, not slides. | Our price change vs input-cost change (pp) | 3-6 months | price |
+| Head of Data · Retailer or distributor | Where are shelf prices running ahead of costs, and can we explain each gap to a regulator? | Monitor shelf vs input-cost gaps by category with alerts; keep the lineage auditable. | Shelf vs farm-gate gap by category (pp) | 0-3 months | price |
+| Procurement analytics lead | If farm-gate costs do not explain supplier quotes, what does: energy, labour or logistics? | Extend the cost model with energy and labour indices so quotes are decomposed by driver. | Share of quote increase explained by each driver | 3-6 months | cost |
+| Pricing and revenue analytics lead | Is there room to invest in price while input costs ease, before competitors do? | Track competitor price indices against ours and the farm-gate index. | Our price index vs competitors (base 100) | 0-3 months | price |
 
 ## When `food_inflation_premium` fires
 
 | Role | Business action | Data action | KPI | Horizon |
 |---|---|---|---|---|
-| Head of Data · Food manufacturer | Food is outpacing household budgets; expect trading down to private label. | Add channel and brand-tier mix to the sales model to catch trading down early. | Private-label share in your categories (%) | 3-6 months |
-| Head of Data · Retailer or distributor | Price perception becomes the battleground; protect key-value items. | Maintain a governed list of key-value items with price-perception tracking. | Basket price index of key-value items | 0-3 months |
-| Pricing and revenue analytics lead | Elasticities shift when food outpaces income; re-estimate before the next price round. | Re-train elasticity models with the inflation premium as a feature. | Elasticity change vs last estimate | 0-3 months |
+| Head of Data · Food manufacturer | Are customers trading down to private label in our categories, and how early can we see it? | Add channel and brand tier to the sales model. | Private-label share in our categories (%) | 3-6 months | volume |
+| Head of Data · Retailer or distributor | Are we protecting price perception on the products customers remember (key-value items)? | A governed list of key-value items with price-perception tracking. | Basket price index of key-value items | 0-3 months | price |
+| Pricing and revenue analytics lead | Have price elasticities changed now that food outpaces other prices? | Re-estimate elasticity models with the food inflation premium as a feature. | Elasticity change vs last estimate | 0-3 months | volume |
 
 ## When `forecast_food_inflation` fires
 
 | Role | Business action | Data action | KPI | Horizon |
 |---|---|---|---|---|
-| Head of Data · Food manufacturer | Build next year's budget on the forecast range, not a single number. | Feed the 80% interval, not only the point, into the planning model and show it in the budget pack. | Budget margin at the low and high end of the interval | next budget cycle |
-| Head of Data · Retailer or distributor | Agree with category teams which interval bound each plan uses. | Publish the forecast as a certified metric with its model version, so every plan cites the same run. | Plans using the certified forecast (%) | next budget cycle |
-| Procurement analytics lead | Front-load purchases where storage allows and prices are still below the forecast. | Combine the forecast with storage capacity and shelf life in a buy-timing model. | Cost avoided vs buying at forecast prices | 3-12 months |
-| Pricing and revenue analytics lead | Prepare the price architecture for the forecast level, with triggers rather than dates. | Encode price triggers as rules on the published forecast, versioned like these alerts. | Time from trigger to price change (days) | 3-12 months |
+| Head of Data · Food manufacturer | What happens to next year's margin at the low and high end of the forecast range? | Feed the 80% interval, not only the point, into the planning model. | Budget margin at both ends of the interval | next budget cycle | cost |
+| Head of Data · Retailer or distributor | Which forecast bound does each category plan use, and do all plans cite the same run? | Publish the forecast as a certified metric with its model version. | Plans using the certified forecast (%) | next budget cycle | trust |
+| Procurement analytics lead | Is it worth buying ahead of the forecast, given storage capacity and shelf life? | Combine the forecast with storage capacity and shelf life in a buy-timing model. | Cost avoided vs buying at forecast prices | 3-12 months | cost |
+| Pricing and revenue analytics lead | Which price changes should trigger automatically if the forecast crosses a threshold? | Encode price triggers as rules on the published forecast, versioned like these alerts. | Time from trigger to price change (days) | 3-12 months | price |
 
 ## When `data_stale` fires
 
 | Role | Business action | Data action | KPI | Horizon |
 |---|---|---|---|---|
-| Head of Data · Food manufacturer | Treat this country's numbers as provisional in any decision. | Show freshness next to every metric and fall back to the regional aggregate with a visible flag. | Decisions taken on stale data (count) | now |
-| Head of Data · Retailer or distributor | Do not benchmark this country's suppliers on these numbers until the data catch up. | Add a freshness SLA per source to the data contract and alert the owner, not the consumer. | Sources within freshness SLA (%) | now |
+| Head of Data · Food manufacturer | Which decisions this month rest on this country's provisional numbers? | Show freshness next to every metric; fall back to the last complete year with a visible flag. | Decisions taken on stale data (count) | now | trust |
+| Head of Data · Retailer or distributor | Are we benchmarking suppliers on numbers that are out of date? | A freshness SLA per source in the data contract; alert the owner, not the consumer. | Sources within freshness SLA (%) | now | trust |
 
 ## When `model_drift` fires
 
 | Role | Business action | Data action | KPI | Horizon |
 |---|---|---|---|---|
-| Head of Data · Food manufacturer | Pause decisions that rely on the point forecast; use the interval or the baseline. | Open a model review - check feature drift, retrain, and re-run the champion selection. | Recent vs long-run forecast error (x) | now |
-| Head of Data · Retailer or distributor | Tell planners the forecast is under review and which fallback to use. | Route drift alerts to the model owner with the backtest attached; record the decision in an ADR. | Time to resolve a drift alert (days) | now |
+| Head of Data · Food manufacturer | Can we still trust the point forecast, or should plans switch to the interval or the baseline? | Open a model review: feature drift, retrain, re-run champion selection. | Recent vs long-run forecast error (x) | now | trust |
+| Head of Data · Retailer or distributor | Do planners know the forecast is under review and which fallback to use? | Route drift alerts to the model owner with the backtest attached; record the decision in an ADR. | Time to resolve a drift alert (days) | now | trust |
